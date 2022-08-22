@@ -28,7 +28,7 @@ pip install nonebot-plugin-cqsat
 再进入`bot.py` 
 加入以下代码
 ```python
-nonebot.load_plugin("nonebot_plugin_admin")
+nonebot.load_plugin("cqsat")
 ```
 
 ### nb-cli安装  [ 推荐 ]
