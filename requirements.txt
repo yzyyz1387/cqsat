@@ -1,0 +1,5 @@
+httpx==0.22.0
+nonebot==1.9.1
+pyephem==9.99
+python_dateutil==2.8.2
+PyYAML==6.0
