@@ -1,6 +1,6 @@
 
 <p align="center">
-  <a href="img/cqsat.png" width="200" height="200" alt="cqsat"></a>
+  <a href="#"><img src="img/cqsat.png" width="200" height="200" alt="nonebot"></a>
 </p>
 
 <div align="center">  
@@ -49,7 +49,16 @@ nb plugin install nonebot-plugin-cqsat
 - 每分钟检测一次
   - 检测当前时间10分钟后，用户所定阅卫星的情况
   - 如果十分钟后入境，并且从入境到出境期间出现的最高仰角大于用户设定的最低仰角，将在群内@用户并提示
+- 在执行输入操作时，输入`取消` 或者 `算了` 可取消当前操作
+## 功能
+- 追星
+  - 提示示例：
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
 
+[](img/readme/at_user.png)
+
+</details>
 
 ## 指令
 ### 绑定QTH:  [ 群内、私聊 ]
@@ -57,6 +66,14 @@ nb plugin install nonebot-plugin-cqsat
 - 更改位置时同样发送：`绑定位置`    
 - 需要输入`经度 纬度 海拔`(以空格分隔)
   - 例如：  75.8656 39.3809 1330.0
+
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/qth.gif)
+
+</details>
+  
 
 ### 订阅卫星：  [ 群内 ]
 订阅时发送：`订阅卫星`  
@@ -66,20 +83,63 @@ nb plugin install nonebot-plugin-cqsat
 - `最低仰角`:  输入数字（1, 90] （允许输入`xx度`或`xx°`）
   - 例如 10
 
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/sat_sub.gif)
+
+</details>
+
 ### 查询订阅的卫星 [ 群内 ]
 - 发送  `查询订阅`
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/refer_sub.gif)
+
+</details>
 
 ### 查询支持的卫星列表 [ 群内、私聊 ]
 - 发送`卫星列表`
+
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/sat_list.gif)
+
+</details>
 
 ### 查询某卫星在指定分钟后的状态 [ 群内、私聊 ]
 - 发送  `查询卫星+卫星名+ +分钟数`  卫星名和分钟数用空格分隔
   - 例如 查询卫星SO-50 50  （查询so-50在50分钟后的状态）
 
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/refer_sat_byTime.gif)
+
+</details>
 
 ### 取消订阅卫星  [ 群内 ]
 - 发送`取消订阅+卫星名称` 多颗卫星用空格分隔
   - 例如：取消订阅 SO-50 ISS ao-92
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/sat_unsub.gif)
+
+</details>
+
+### 取消当前操作
+- 在问答过程中发送`取消` 或者 `算了` 可取消当前操作
+
+<details>
+  <summary> <h3>点击查看截图</h3></summary>  
+
+[](img/readme/cancel.gif)
+
+</details>
+
 
 ## 日志
 本插件`debug`级别日志输出到了机器`人文件夹/cqsat/log.log`中
@@ -90,6 +150,8 @@ nb plugin install nonebot-plugin-cqsat
 - [ ] 刷题
 - [ ] 相关计算
 - [ ] ....
+
+
 
 ## 参考资料
 
