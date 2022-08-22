@@ -36,6 +36,8 @@ async def _(
         event: MessageEvent,
         state: T_State,
         qth: str = ArgStr("QTH")):
+    if not Path.exists(LOCAL):
+        Path.mkdir(LOCAL)
     qq = event.user_id
     if qth in ["取消", "算了"]:
         await sub.finish("已取消操作...")

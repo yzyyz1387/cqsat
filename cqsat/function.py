@@ -9,6 +9,8 @@ import json
 import re
 from typing import Dict
 
+from typing import Optional
+
 from .log import log
 from .utils import *
 from .path import *
