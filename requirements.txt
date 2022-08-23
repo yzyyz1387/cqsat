@@ -1,5 +1,6 @@
 httpx==0.22.0
-nonebot==1.9.1
+nonebot-adapter-onebot>=2.0.0-beta.1
+nonebot2>=2.0.0-beta.4
 pyephem==9.99
 python_dateutil==2.8.2
 PyYAML==6.0

@@ -24,7 +24,7 @@ setuptools.setup(
     ],
     include_package_data=True,
     platforms="any",
-    install_requires=["httpx", "nonebot", "pyephem", "python_dateutil", "PyYAML",
+    install_requires=["httpx", "pyephem", "python_dateutil", "PyYAML",
                       'nonebot-adapter-onebot>=2.0.0-beta.1', 'nonebot2>=2.0.0-beta.4'
                       ]
 )
