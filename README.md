@@ -56,7 +56,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/at_user.png)
+![](img/readme/at_user.png)
 
 </details>
 
@@ -70,7 +70,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/qth.gif)
+![](img/readme/qth.gif)
 
 </details>
   
@@ -86,7 +86,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/sat_sub.gif)
+![](img/readme/sat_sub.gif)
 
 </details>
 
@@ -95,7 +95,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/refer_sub.gif)
+![](img/readme/refer_sub.gif)
 
 </details>
 
@@ -105,7 +105,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/sat_list.gif)
+![](img/readme/sat_list.gif)
 
 </details>
 
@@ -116,7 +116,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/refer_sat_byTime.gif)
+![](img/readme/refer_sat_byTime.gif)
 
 </details>
 
@@ -126,7 +126,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/sat_unsub.gif)
+![](img/readme/sat_unsub.gif)
 
 </details>
 
@@ -136,7 +136,7 @@ nb plugin install nonebot-plugin-cqsat
 <details>
   <summary> <h3>点击查看截图</h3></summary>  
 
-[](img/readme/cancel.gif)
+![](img/readme/cancel.gif)
 
 </details>
 
