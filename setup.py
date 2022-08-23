@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8", errors="ignore") as fh:
 
 setuptools.setup(
     name="nonebot-plugin-cqsat",
-    version="0.0.3",
+    version="0.0.4",
     author="yzyyz1387",
     author_email="youzyyz1384@gmail.com",
     keywords=("ham", "nonebot2", "nonebot", "radio", "nonebot_plugin"),
