@@ -9,9 +9,10 @@ from pathlib import Path
 
 
 LOCAL = Path() / 'cqsat'
-HAM_SAT = LOCAL / 'ham_sat.txt'
-TIANGONG = LOCAL / 'tiangong.txt'
+HAM_SAT = LOCAL / 'ham_sat.json'
+TIANGONG = LOCAL / 'tiangong.json'
 CONFIG = LOCAL / 'config.yml'
 TEMP = LOCAL / 'temp.yaml'
-DATA_DICT = LOCAL / 'data.txt'
+DATA_DICT = LOCAL / 'data.json'
 QTH = LOCAL / 'qth.yml'
+LOG = LOCAL / 'log.log'

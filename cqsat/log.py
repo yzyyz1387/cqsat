@@ -8,9 +8,10 @@
 import os
 import sys
 import logging
+from .path import *
 
 
-def log(path: str = './log.log') -> logging.Logger:
+def log(path: str = LOG) -> logging.Logger:
     """
     日志
     :return:
