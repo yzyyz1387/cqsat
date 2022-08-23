@@ -3,7 +3,7 @@
 # @Time    : 2022/8/21 2:28
 # @Author  : yzyyz
 # @Email   :  youzyyz1384@qq.com
-# @File    : function.py
+# @File    : calculate_sat.py
 # @Software: PyCharm
 import json
 import re
@@ -11,10 +11,11 @@ from typing import Dict
 
 from typing import Optional
 
-from .log import log
-from .utils import *
-from .path import *
+from ..log import log
+from ..utils import *
+from ..path import *
 import ephem
+
 logger = log()
 
 
@@ -27,12 +28,13 @@ async def get_tian_gong():
     line2 = selected[1].replace('&nbsp;', ' ')
     tg_data = {"天宫": [line1, line2]}
     logger.debug("写入本地数据...")
-    await write_(TIANGONG, str(tg_data))
+    await write_(TIANGONG, json.dumps(str(tg_data)))
     return tg_data
 
 
 async def download_ham_sat():
     Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
+    await get_tian_gong()
     logger.debug("读取在线数据...")
     url = "https://amsat.org/tle/current/nasabare.txt"
     ham_sat_ = await http_get(url)
@@ -41,7 +43,7 @@ async def download_ham_sat():
         return None
     else:
         logger.debug("写入本地数据...")
-        await write_(HAM_SAT, ham_sat_)
+        await write_(HAM_SAT, json.dumps(str(ham_sat_)))
         return ham_sat_
 
 
@@ -62,7 +64,7 @@ async def data2Tle() -> Dict[str, list]:
             data[temp[0]] = temp[1:]
             count = 0
             temp = []
-    await write_(DATA_DICT, str(data))
+    await write_(DATA_DICT, json.dumps(str(data)))
     return data
 
 
@@ -104,11 +106,8 @@ async def calculate(name: str, location: list, time=ephem.now()) -> Optional[lis
         return None
 
 
-
-
-
 if __name__ == '__main__':
     import asyncio
+
     loop = asyncio.get_event_loop()
     loop.run_until_complete(calculate("PO-101"))
-
