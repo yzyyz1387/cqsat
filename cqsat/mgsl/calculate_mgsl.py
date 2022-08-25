@@ -48,3 +48,10 @@ def getGrid(lon, lat):
     gridPos += getSquare(lon, lat)
     gridPos += getSubSquare(lon, lat)
     return gridPos
+
+
+if __name__ == '__main__':
+    lon = 75.8656
+    lat = 39.3809
+    a = getGrid(lon, lat)
+    print(a)

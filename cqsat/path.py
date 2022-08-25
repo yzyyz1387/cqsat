@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 LOCAL = Path() / 'cqsat'
-HAM_SAT = LOCAL / 'ham_sat.json'
+HAM_SAT = LOCAL / 'ham_sat.txt'
 TIANGONG = LOCAL / 'tiangong.json'
 CONFIG = LOCAL / 'config.yml'
 TEMP = LOCAL / 'temp.yaml'

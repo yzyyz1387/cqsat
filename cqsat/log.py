@@ -8,6 +8,7 @@
 import os
 import sys
 import logging
+from pathlib import Path
 from .path import *
 
 
@@ -16,6 +17,7 @@ def log(path: str = LOG) -> logging.Logger:
     日志
     :return:
     """
+    Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s-%(levelname)s: %(message)s')

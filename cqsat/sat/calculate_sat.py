@@ -43,7 +43,7 @@ async def download_ham_sat():
         return None
     else:
         logger.debug("写入本地数据...")
-        await write_(HAM_SAT, json.dumps(str(ham_sat_)))
+        await write_(HAM_SAT, str(ham_sat_))
         return ham_sat_
 
 
