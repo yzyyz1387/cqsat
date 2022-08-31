@@ -86,7 +86,7 @@ nb plugin install nonebot-plugin-cqsat
   - 地名
     - 例如：`北京`
   - `经度 纬度 海拔`(以空格分隔)
-      - 例如：  75.8656 39.3809 1330.0
+    - 例如：  75.8656 39.3809 1330.0
 
 <details>
   <summary> <h3>点击查看截图</h3></summary>
@@ -176,6 +176,13 @@ nb plugin install nonebot-plugin-cqsat
 - 发送 `计算网格+经度+  +纬度` 计算指定位置的网格 经纬度用空格分隔
   - 不加经纬度相当于 `我的网格` 指令
 
+<details>
+  <summary> <h3>点击查看截图</h3></summary>
+
+![](img/readme/mgsl.gif)
+
+</details>
+
 ### 考题
 
 #### 刷题
@@ -208,7 +215,6 @@ nb plugin install nonebot-plugin-cqsat
 - [ ]  卫星状态、卫星列表加入图片支持
 
 ## 参考资料
-
 
 [PyEphem Home Page — PyEphem home page (rhodesmill.org)](https://rhodesmill.org/pyephem/)
 
