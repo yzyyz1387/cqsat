@@ -4,6 +4,7 @@ span
 
 **你的star是我的动力**
 **↓**
+
 <img src="https://img.shields.io/github/stars/yzyyz1387/cqsat.svg?style=social">
 
 # HAM助手
@@ -11,6 +12,35 @@ span
 _✨ NoneBot2 业余无线电插件✨ _
 
 </div>
+
+span
+
+- [HAM助手](#ham助手)
+  - [安装](#安装)
+    - [直接安装](#直接安装)
+    - [pip安装](#pip安装)
+    - [nb-cli安装  【推荐】](#nb-cli安装--推荐)
+  - [说明](#说明)
+    - [追星](#追星)
+      - [数据来源](#数据来源)
+      - [使用时](#使用时)
+      - [刷题](#刷题)
+  - [功能](#功能)
+  - [指令](#指令)
+    - [绑定QTH:  【群内、私聊】](#绑定qth--群内私聊)
+    - [订阅卫星：  【群内】](#订阅卫星--群内)
+    - [查询订阅的卫星 【群内】](#查询订阅的卫星-群内)
+    - [查询支持的卫星列表 【群内、私聊】](#查询支持的卫星列表-群内私聊)
+    - [查询某卫星在指定分钟后的状态 【群内、私聊】](#查询某卫星在指定分钟后的状态-群内私聊)
+    - [取消订阅卫星  【群内】](#取消订阅卫星--群内)
+    - [取消当前操作](#取消当前操作)
+    - [网格 【私聊、群内】](#网格-私聊群内)
+    - [考题](#考题)
+      - [刷题 【私聊、群内】](#刷题-私聊群内)
+  - [TODO](#todo)
+  - [参考资料](#参考资料)
+
+</details>
 
 ## 安装
 
@@ -38,7 +68,7 @@ pip install nonebot-plugin-cqsat
 nonebot.load_plugin("cqsat")
 ```
 
-### nb-cli安装  [ 推荐 ]
+### nb-cli安装  【推荐】
 
 打开机器人项目文件夹（bot.py同级目录）
 执行
@@ -49,12 +79,14 @@ nb plugin install nonebot-plugin-cqsat
 
 ## 说明
 
-### 数据来源
+### 追星
+
+#### 数据来源
 
 - 目前只支持来自[http://www.cmse.gov.cn/gfgg/zgkjzgdcs/](http://www.cmse.gov.cn/gfgg/zgkjzgdcs/)的数据
 - 还支持中国空间站，中国空间站TLE数据来自[中国载人航天官方](http://www.cmse.gov.cn/gfgg/zgkjzgdcs/)
 
-### 使用时
+#### 使用时
 
 **- 对于中国空间站，在使用时建议用`天宫`**
 
@@ -63,6 +95,12 @@ nb plugin install nonebot-plugin-cqsat
   - 检测当前时间10分钟后，用户所定阅卫星的情况
   - 如果十分钟后入境，并且从入境到出境期间出现的最高仰角大于用户设定的最低仰角，将在群内@用户并提示
 - 在执行输入操作时，输入`取消` 或者 `算了` 可取消当前操作
+
+#### 刷题
+
+当前题目版本：_v20211022_
+题目来源：[CRAC官网](http://crac.org.cn/News/Detail?ID=3dbd1bc7f36443958e1872234f42464f)
+根据官方题目生成的json文件位于：/cqsat_resource/bank 下
 
 ## 功能
 
@@ -78,7 +116,7 @@ nb plugin install nonebot-plugin-cqsat
 
 ## 指令
 
-### 绑定QTH:  [ 群内、私聊 ]
+### 绑定QTH:  【群内、私聊】
 
 - 绑定时发送：`绑定位置`
 - 更改位置时同样发送：`绑定位置`
@@ -95,7 +133,7 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 订阅卫星：  [ 群内 ]
+### 订阅卫星：  【群内】
 
 订阅时发送：`订阅卫星`期间会让用户输入：
 
@@ -111,7 +149,7 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 查询订阅的卫星 [ 群内 ]
+### 查询订阅的卫星 【群内】
 
 - 发送  `查询订阅`
 
@@ -122,7 +160,7 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 查询支持的卫星列表 [ 群内、私聊 ]
+### 查询支持的卫星列表 【群内、私聊】
 
 - 发送`卫星列表`
 
@@ -133,7 +171,7 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 查询某卫星在指定分钟后的状态 [ 群内、私聊 ]
+### 查询某卫星在指定分钟后的状态 【群内、私聊】
 
 - 发送  `查询卫星+卫星名+ +分钟数`  卫星名和分钟数用空格分隔
   - 例如 查询卫星SO-50 50  （查询so-50在50分钟后的状态）
@@ -146,7 +184,7 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 取消订阅卫星  [ 群内 ]
+### 取消订阅卫星  【群内】
 
 - 发送`取消订阅+卫星名称` 多颗卫星用空格分隔
   - 例如：取消订阅 SO-50 ISS ao-92
@@ -169,10 +207,10 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 网格
+### 网格 【私聊、群内】
 
 - 发送 `我的网格` 查询用户绑定qth的网格
-- 发送 `计算玩网格 +地名` 计算指定地址的网格，如 `计算网格 北京`
+- 发送 `计算网格 +地名` 计算指定地址的网格，如 `计算网格 北京`
 - 发送 `计算网格+经度+  +纬度` 计算指定位置的网格 经纬度用空格分隔
   - 不加经纬度相当于 `我的网格` 指令
 
@@ -185,14 +223,10 @@ nb plugin install nonebot-plugin-cqsat
 
 ### 考题
 
-#### 刷题
+#### 刷题 【私聊、群内】
 
 - 发送 `刷题` 开始顺序刷题
 - 发送 `取消` 、 `退出` 取消当前刷题
-
-当前题目版本：_v20211022_
-题目来源：[CRAC官网](http://crac.org.cn/News/Detail?ID=3dbd1bc7f36443958e1872234f42464f)
-根据官方题目生成的json文件位于：/resource/bank 下
 
 <details>
   <summary> <h3>点击查看截图</h3></summary>
@@ -201,10 +235,9 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-## 日志
-
-本插件`debug`级别日志输出到了机器`人文件夹/cqsat/log.log`中
-
+[//]: #
+[//]: #
+[//]: #
 ## TODO
 
 - [X]  追星
