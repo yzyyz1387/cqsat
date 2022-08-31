@@ -7,24 +7,15 @@
 # @Software: PyCharm
 import json
 import random
-from datetime import datetime, timedelta
 
-import nonebot
-from dateutil.parser import ParserError
-from dateutil.parser import parse
-from nonebot import on_command, require
-from nonebot.adapters import Message
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, MessageSegment, MessageEvent
-from nonebot.adapters.onebot.exception import ActionFailed
+from nonebot import on_command
+from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent
 from nonebot.internal.params import ArgStr, ArgPlainText
-from nonebot.params import CommandArg
 from nonebot.typing import T_State
 
-from ..log import log
-from ..path import *
 from ..utils import *
 
-RESOURCE = Path(__file__).parent.parent / "resource"
+RESOURCE = Path(__file__).parent.parent.parent / "cqsat_resource"
 BANK = RESOURCE / "bank"
 IMG = BANK / 'imgs'
 do_exercise = on_command("刷题", block=True)
@@ -72,7 +63,6 @@ async def _(state: T_State, reply: str = ArgPlainText("answer")):
     qq = state["qq"]
     last = state['last']
     ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
-    logger.info(state)
     if reply in ["取消", "算了", "退出", "不做了", "怎么退出"]:
         temp = {qq: {"level": level, "last": last}}
         await yaml_upload(EXERCISE_TEMP, temp)

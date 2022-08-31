@@ -8,7 +8,7 @@
 import json
 from pathlib import Path
 
-RESOURCE = Path.cwd().parent / "resource"
+RESOURCE = Path.cwd().parent / "cqsat_resource"
 BANK = RESOURCE / "bank"
 
 
