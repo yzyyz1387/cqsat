@@ -5,9 +5,11 @@
 # @Email   :  youzyyz1384@qq.com
 # @File    : __init__.py.py
 # @Software: PyCharm
-from . import (mgsl,
-               sat,
-               log,
-               path,
-               utils
+from . import (
+    exercise,
+    mgsl,
+    sat,
+    log,
+    path,
+    utils
                )

@@ -5,25 +5,31 @@
 # @Email   :  youzyyz1384@qq.com
 # @File    : utils.py
 # @Software: PyCharm
-from typing import Union
+from typing import Union, Optional, TextIO
 
 import httpx
 import yaml
 
 from .log import log
+from .path import *
 
 logger = log()
 
 
-async def http_get(url: str) -> str:
+async def http_get(url: str, type_: str = "text") -> Union[str, dict]:
     """
     获取链接中的内容
+    :param type_: text 或 json
     :param url: 链接
     :return:
     """
     try:
         async with httpx.AsyncClient() as client:
-            return (await client.get(url)).text
+            result = (await client.get(url))
+            if type_ == "json":
+                return result.json()
+            else:
+                return result.text
     except Exception as e:
         logger.error(e)
         return ""
@@ -56,7 +62,7 @@ async def write_(path: str, data: str) -> None:
         f.close()
 
 
-async def read_(path: str):
+async def read_(path: Union[Path, str]) -> TextIO:
     """
     读取文件
     :param path: 文件路径
@@ -66,7 +72,7 @@ async def read_(path: str):
         return f
 
 
-async def read_all(path: str) -> str:
+async def read_all(path: Union[Path, str]) -> str:
     with open(path, 'r', encoding='utf-8') as f:
         return f.read()
 
@@ -91,6 +97,18 @@ async def yaml_dump(path: str, data: dict) -> None:
     with open(path, 'w', encoding='utf-8') as f:
         yaml.dump(data, f, allow_unicode=True)
         f.close()
+
+
+async def yaml_upload(path: str, data: dict) -> None:
+    """
+    更新yaml文件
+    :param path: 文件路径
+    :param data: 数据
+    :return:
+    """
+    raw = await yaml_load(path)
+    raw.update(data)
+    await yaml_dump(path, raw)
 
 
 def az2direction(azimuth: Union[float, int]):
@@ -124,3 +142,31 @@ def isChinese(word):
     return False
 
 
+async def getQth(qq: int) -> Optional[list]:
+    """
+    获取QTH
+    :param qq: QQ号
+    :return: None 或 [经度， 纬度， 海拔]
+    """
+    qth_dict = await yaml_load(QTH)
+    if qq in qth_dict:
+        return qth_dict[qq]
+    else:
+        return None
+
+
+async def getLlByAd(address: str, type_: str = "float") -> Optional[list]:
+    """
+    根据地名获取经纬度
+    :param type_: float 或 str
+    :param address: 地名
+    :return: None 或 [经度， 纬度]
+    """
+    temp_dic: dict = await http_get(f"https://apis.map.qq.com/jsapi?qt=geoc&addr={address}", type_="json")
+    if temp_dic and temp_dic["info"]["error"] == 0:
+        if type_ == "float":
+            return [float(temp_dic["detail"]["pointx"]), float(temp_dic["detail"]["pointy"])]
+        elif type_ == "str":
+            return [temp_dic["detail"]["pointx"], temp_dic["detail"]["pointy"]]
+    else:
+        return None

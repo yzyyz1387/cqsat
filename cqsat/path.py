@@ -7,7 +7,6 @@
 # @Software: PyCharm
 from pathlib import Path
 
-
 LOCAL = Path() / 'cqsat'
 HAM_SAT = LOCAL / 'ham_sat.txt'
 TIANGONG = LOCAL / 'tiangong.json'
@@ -16,3 +15,4 @@ TEMP = LOCAL / 'temp.yaml'
 DATA_DICT = LOCAL / 'data.json'
 QTH = LOCAL / 'qth.yml'
 LOG = LOCAL / 'log.log'
+EXERCISE_TEMP = LOCAL / 'exercise_temp.yml'

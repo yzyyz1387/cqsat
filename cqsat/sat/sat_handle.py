@@ -30,7 +30,7 @@ Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
 bind_qth = on_command("绑定位置", aliases={"绑定QTH", "绑Qth", "绑定qth"}, block=True)
 
 
-@bind_qth.got("QTH", prompt="请输入 经度 纬度 海拔\n参数用空格分隔\n")
+@bind_qth.got("QTH", prompt="请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
 async def _(
         event: MessageEvent,
         state: T_State,
@@ -39,20 +39,32 @@ async def _(
         Path.mkdir(LOCAL)
     qq = event.user_id
     if qth in ["取消", "算了"]:
-        await sub.finish("已取消操作...")
+        await bind_qth.finish("已取消操作...")
     qth_list = str(qth).split(" ")
-    log().info(len(qth_list))
-    if len(qth_list) != 3:
-        await sub.reject_arg("QTH", "QTH参数不正确，请重新输入\n 经度 纬度 海拔\n参数用空格分隔\n")
-    else:
-        try:
-            if float(qth_list[0]) and float(qth_list[1]) and float(qth_list[2]):
-                state["qth"] = qth_list
-                qth_data = {qq: qth_list}
+    logger.info(len(qth_list))
+    if len(qth_list) == 1:
+        temp_list = await getLlByAd(qth_list[0], type_="str")
+        if temp_list:
+            qth_list = temp_list
+            qth_list.append(1000)
+            await bind_qth.send(f"已自动获取到{qth}的经纬度信息, 海拔默认为1000米")
+        else:
+            await bind_qth.finish(f"没有找到{qth}的经纬度，请重新输入...")
+    elif len(qth_list) < 3:
+        await bind_qth.reject_arg("QTH", "你的输入貌似有错误呢，请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
+    # else:
+    logger.info(qth_list)
+    try:
+        if float(qth_list[0]) and float(qth_list[1]) and float(qth_list[2]):
+            state["qth"] = qth_list
+            qth_data = {qq: qth_list}
+            if not Path.exists(QTH):
                 await yaml_dump(QTH, qth_data)
-                await bind_qth.finish("绑定成功！")
-        except ValueError:
-            await sub.reject_arg("QTH", "QTH参数不正确，请重新输入\n  经度 纬度 海拔\n参数用空格分隔\n")
+            else:
+                await yaml_upload(QTH, qth_data)
+            await bind_qth.finish(f"绑定成功：\n{qth_list}")
+    except ValueError:
+        await sub.reject_arg("QTH", "请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
 
 
 sub = on_command("订阅卫星", priority=2, block=True)
@@ -175,7 +187,7 @@ async def unsub_(bot: Bot, event: GroupMessageEvent, state: T_State, args: Messa
         await unsub.finish("取消订阅命令为：\n   取消订阅+卫星名称\n例如：\n   取消订阅AO-72\n多颗卫星用空格分隔")
 
 
-refer_sat_subs = on_command("查询订阅", block=True)
+refer_sat_subs = on_command("查询订阅", aliases={"我的订阅"}, block=True)
 
 
 @refer_sat_subs.handle()
@@ -209,7 +221,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
     await refer_sat.send(f"卫星列表：\n{reply}")
 
 
-specified = on_command("查询卫星", block=True)
+specified = on_command("查询卫星", aliases={"计算卫星"}, block=True)
 
 
 @specified.handle()
@@ -239,7 +251,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
         sat_dict = (await get_tian_gong())
     if sat in sat_dict:
         out = await calculate(sat, qth, time=time)
-        reply = f"{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]),2)}°\n方位角:{round(float(out[0]),2)}°\n相对速率为：{round(float(out[2]),2)} "
+        reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]),2)}°\n方位角:{round(float(out[0]),2)}°\n相对速率为：{round(float(out[2]),2)} "
         await specified.send(reply)
     else:
         await specified.send(f"{sat}不存在")
