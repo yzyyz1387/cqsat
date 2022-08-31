@@ -49,7 +49,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             else:
                 await grid_refer.finish(f"未查询到{user_input}的经纬度")
         elif len(args) >= 2:
-            await grid_refer.finish(f"{args[0], args[1]}网格是:{await getGrid(float(args[0]), float(args[1]))}")
+            await grid_refer.finish(f"{args[0], args[1]}网格是:\n{'-'*10}{await getGrid(float(args[0]), float(args[1]))}\n{'-'*10}")
         else:
             await grid_refer.finish("你的输入貌似有误，检查一下吧")
     else:
