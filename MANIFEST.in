@@ -1,0 +1,3 @@
+recursive-include cqsat/cqsat_resource/bank/imgs *.jpg *.png
+recursive-include cqsat/cqsat_resource/bank *.json
+recursive-include cqsat/pre *.txt

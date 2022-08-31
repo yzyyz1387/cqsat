@@ -15,7 +15,7 @@ from nonebot.typing import T_State
 
 from ..utils import *
 
-RESOURCE = Path(__file__).parent.parent.parent / "cqsat_resource"
+RESOURCE = Path(__file__).parent.parent / "cqsat_resource"
 BANK = RESOURCE / "bank"
 IMG = BANK / 'imgs'
 do_exercise = on_command("刷题", block=True)
