@@ -1,4 +1,3 @@
-span
 
 <div align="center">
 
@@ -13,7 +12,9 @@ _✨ NoneBot2 业余无线电插件✨ _
 
 </div>
 
-span
+<details>
+  <summary> <h3>点击查看目录</h3></summary>
+
 
 - [HAM助手](#ham助手)
   - [安装](#安装)
