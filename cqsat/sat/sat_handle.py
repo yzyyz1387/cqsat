@@ -51,7 +51,8 @@ async def _(
         else:
             await bind_qth.finish(f"没有找到{qth}的经纬度，请重新输入...")
     elif len(qth_list) < 3:
-        await bind_qth.reject_arg("QTH", "你的输入貌似有错误呢，请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
+        await bind_qth.reject_arg("QTH",
+                                  "你的输入貌似有错误呢，请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
     # else:
     logger.info(qth_list)
     try:
@@ -251,7 +252,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
         sat_dict = (await get_tian_gong())
     if sat in sat_dict:
         out = await calculate(sat, qth, time=time)
-        reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]),2)}°\n方位角:{round(float(out[0]),2)}°\n相对速率为：{round(float(out[2]),2)} "
+        reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]), 2)}°\n方位角:{round(float(out[0]), 2)}°\n相对速率为：{round(float(out[2]), 2)} "
         await specified.send(reply)
     else:
         await specified.send(f"{sat}不存在")
@@ -282,16 +283,14 @@ async def aps():
                 now_to_calculate = (datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
                 min_add = 10
                 if int((parse(now_to_calculate) - last).total_seconds() / 60) >= 60:
-
                     now = (datetime.utcnow() + timedelta(minutes=min_add)).strftime("%Y-%m-%d %H:%M:%S")
-                    # time_to_send = (datetime.now() + timedelta(minutes=min_add)).strftime("%Y-%m-%d %H:%M:%S")
                     result = await calculate(sat, data[group][qq][sat]["qth"], now)
                     sated = []
-                    # if float(result[1]) >= float(data[group][qq][sat]["仰角"]):
                     if float(result[1]) > 0:
                         logger.info(f"@{qq} 订阅的 {sat} 将入境，正准备计算最高仰角")
                         i = 0
-                        # ang_s = []
+                        az_list = []
+                        alt_list = []
                         time_highest_point = {}
                         result_ = await calculate(sat, data[group][qq][sat]["qth"], now)
                         while float(result_[1]) >= 0:
@@ -299,14 +298,16 @@ async def aps():
                                 "%Y-%m-%d %H:%M:%S")
                             result_ = await calculate(sat, data[group][qq][sat]["qth"], now)
                             i += 1
-                            print(result_[1])
+                            az_list.append(float(result_[0]))
+                            alt_list.append(float(result_[1]))
+                            logger.debug("方位角信息：")
+                            logger.debug(az_list)
+                            logger.debug("仰角信息：")
+                            logger.debug(alt_list)
                             time_highest_point[now] = float(result_[1])
-                            # ang_s.append(float(result[1]))
                         a1 = sorted(time_highest_point.items(), key=lambda x: x[1], reverse=True)
                         if float(a1[0][1]) >= float(data[group][qq][sat]["仰角"]):
                             logger.info("最高仰角大于用户设定的值，正准备提醒用户")
-                        # ang_s.sort(reverse=True)
-                        # logger.debug(ang_s)
                             if sat not in sated:
                                 logger.info("成功预测到卫星。正在尝试发送数据")
                                 azimuth = float(result_[0])
@@ -314,9 +315,14 @@ async def aps():
                                 azimuth_ = float(result[0])
                                 r_direction = az2direction(azimuth_)
                                 try:
-                                    await nonebot.get_bot().send_group_msg(group_id=group,
-                                                                           message=MessageSegment.at(
-                                                                               qq) + f'\n{sat} 卫星将于 {(parse(a1[0][0]) + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")} 出现最高仰角\n角度为{round(float(a1[0][1]), 1)}°\n入境方位为：{r_direction}\n入境方位角：{round(float(result[0]), 1)}\n出境方位为：{direction}\n出境方位角：{round(azimuth, 1)}°')
+                                    await nonebot.get_bot().send_group_msg(
+                                        group_id=group,
+                                        message=MessageSegment.at(qq) + f'\n'
+                                                                        f'{sat} 卫星将于 {(parse(a1[0][0]) + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")} 出现最高仰角\n'
+                                                                        f'角度为{round(float(a1[0][1]), 1)}°\n'
+                                                                        f'入境方位为：{r_direction}\n'
+                                                                        f'入境方位角：{round(float(result[0]), 1)}\n出境方位为：{direction}\n '
+                                                                        f'出境方位角：{round(azimuth, 1)}°')
                                 except ActionFailed:
                                     logger.error("消息发送失败，账号可能被风控")
                                 sated.append(sat)
