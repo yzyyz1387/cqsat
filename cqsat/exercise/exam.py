@@ -10,7 +10,8 @@ import json
 import random
 
 from nonebot import on_command, require, Bot
-from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, PrivateMessageEvent, \
+    Event
 from nonebot.internal.params import ArgStr, ArgPlainText
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
@@ -28,13 +29,17 @@ do_exam = on_command("ham考试", aliases={"Ham考试", "HAM考试", "H考试", 
 @do_exam.got("level", prompt="请你要进行哪个等级的考试？（A B C）")
 async def _(
         matcher: Matcher,
-        event: MessageEvent,
+        event: Event,
         state: T_State,
         answer=None,
         level: str = ArgStr("level")):
     global USER_PATH
-    qq = event.user_id
-
+    if isinstance(event, GroupMessageEvent):
+        qq = event.user_id
+        state["user_notice"] = MessageSegment.at(qq)
+    elif isinstance(event, PrivateMessageEvent):
+        qq = event.user_id
+        state["user_notice"] = ""
     if level in ["取消", "算了", "不考了", "退出考试", "退出"]:
         await do_exam.finish("已取消操作...")
     elif level.upper() not in ["A", "B", "C"]:
@@ -56,7 +61,7 @@ async def _(
                 wrong_to_send += f"{i}: {wrong[i]}次\n"
         else:
             wrong_to_send = "无"
-        await do_exam.send(f"你在此前已经完成过{already_done}次考试，最高分为{best}分，错题情况如下：\n{wrong_to_send}")
+        await do_exam.send(state["user_notice"] + f"你在此前已经完成过{already_done}次考试，最高分为{best}分，错题情况如下：\n{wrong_to_send}")
 
     state['last'] = 0
     state["correct"] = 0
@@ -108,7 +113,7 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
         time_is_up = state["time_is_up"]
         time_left = time_is_up - datetime.datetime.now()
         time_left = time_left.seconds // 60
-        await do_exam.send(f"距离考试结束还有{time_left}分钟")
+        await do_exam.send(state["user_notice"] + f"距离考试结束还有{time_left}分钟")
 
     if state["is_send"]:
         if reply.upper() in ["A", "B", "C", "D"]:
@@ -116,7 +121,7 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
                 for i in range(this_config[0]):
                     # if state["this_send"][reply.upper()] != state["this_answer"]:
                     if reply.upper() != state["this_answer"]:
-                        await do_exam.send(f"× 应为 {state['this_answer']}")
+                        await do_exam.send(f"× 应为 {state['this_answer']}"+ "\n"+ state["user_notice"])
                         last_ = last
                         last = ex_list[ex_list.index(last) + 1]
                         state["last"] = last
@@ -175,8 +180,9 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
                 logger.info(user_history)
                 user_history["Accuracy"].append(state["correct"] / this_config[0])
                 await yaml_dump(USER_PATH, user_history)
-                await do_exam.send("已完成本次考试")
-                await do_exam.send(f"本次考试共【{this_config[0]}】题\n"
+                await do_exam.send(state["user_notice"] + "已完成本次考试")
+                await do_exam.send(state["user_notice"] + "\n" +
+                                   f"本次考试共【{this_config[0]}】题\n"
                                    f"正确【{state['correct']}】题\n"
                                    f"错误【{len(state['wrong'])}】题\n"
                                    f"{'-' * 10}\n"
