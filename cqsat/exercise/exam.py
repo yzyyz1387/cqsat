@@ -74,6 +74,7 @@ async def _(
 @do_exam.got("answer", prompt="回复任意内容开始...")
 async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer")):
     global ex_list
+    scheduler = require("nonebot_plugin_apscheduler").scheduler
     level = state["level"]
     qq = state["qq"]
     USER_PATH = EXAM_CACHE / level.upper() / f"{qq}.yml"
@@ -89,13 +90,12 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
         time_up = datetime.datetime.now() + datetime.timedelta(minutes=this_config[1])
         await do_exam.send(f"考试于{time_up.strftime('%H:%M:%S')}结束")
         state["time_is_up"] = time_up
-    #     在time_up这个时间设置定时任务，如果到了这个时间，就执行finish_matcher_cause_time
-        scheduler = require("nonebot_plugin_apscheduler").scheduler
         scheduler.add_job(
             finish_matcher_cause_time,
             "date",
             run_date=time_up,
-            args=[matcher]
+            args=[matcher],
+            id=f"{qq}_exam"
         )
 
     ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
@@ -108,6 +108,7 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
         last = ex_list[0]
         state['last'] = last
     if reply in ["取消", "算了", "退出", "不做了", "怎么退出"]:
+        scheduler.remove_job(f"{qq}_exam")
         await do_exam.finish("已取消操作...")
     if reply in ["时间", "还有多久结束", "还剩多久结束", "查看时间"]:
         time_is_up = state["time_is_up"]
