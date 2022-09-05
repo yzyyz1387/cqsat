@@ -99,8 +99,8 @@ nb plugin install nonebot-plugin-cqsat
 
 #### 刷题
 
-当前题目版本：_v20211022_
-题目来源：[CRAC官网](http://crac.org.cn/News/Detail?ID=3dbd1bc7f36443958e1872234f42464f)
+当前题目版本：_v20211022_  
+题目来源：[CRAC官网](http://crac.org.cn/News/Detail?ID=3dbd1bc7f36443958e1872234f42464f)  
 根据官方题目生成的json文件位于：/cqsat_resource/bank 下
 
 ## 功能
@@ -228,6 +228,18 @@ nb plugin install nonebot-plugin-cqsat
 
 - 发送 `刷题` 开始顺序刷题
 - 发送 `取消` 、 `退出` 取消当前刷题
+
+#### 考试
+- 发送`HAM考试` 、`h考试` 开始考试
+- 考试过程中发送 `时间` 可查看考试剩余时间
+- 考试过程中发送 `退出` 可退出考试
+- 做完题目自动交卷
+- 规定时间内未做完题目自动交卷
+- 交卷后可查看考试结果及分析
+
+- 发送 `我的错题` 可查看错题
+- 发送 `查题 + 级别 + 题号` 可查看指定题目
+  - 例如 `查题 A 1` 查看A类考试第一题
 
 <details>
   <summary> <h3>点击查看截图</h3></summary>

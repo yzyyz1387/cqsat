@@ -5,10 +5,14 @@
 # @Email   :  youzyyz1384@qq.com
 # @File    : utils.py
 # @Software: PyCharm
+import json
+import random
 from typing import Union, Optional, TextIO
 
 import httpx
 import yaml
+from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.matcher import Matcher
 
 from .log import log
 from .path import *
@@ -170,3 +174,71 @@ async def getLlByAd(address: str, type_: str = "float") -> Optional[list]:
             return [temp_dic["detail"]["pointx"], temp_dic["detail"]["pointy"]]
     else:
         return None
+
+
+async def send_ex(
+        matcher: Matcher,
+        ex_bank: dict,
+        last: int,
+        qq: int,
+        level: str,
+        state: dict,
+        img: Path,
+        mode: str = "exec"
+):
+    """
+    发送题目
+    :param img: Path
+    :param matcher: Matcher
+    :param ex_bank: 题录字典
+    :param last: 发送的题目
+    :param qq: qq
+    :param level: 等级
+    :param state: state
+    :param mode: exec 或 exam
+    :return:
+    """
+    state_for_time = EXAM_CACHE / matcher.state["level"].upper() / f"{matcher.state['qq']}_state.txt"
+    logger.info(f"发送题目：{last}")
+    if mode == "exec":
+        temp = {qq: {"level": level, "last": last}}
+        await yaml_upload(EXERCISE_TEMP, temp)
+    ex_list = state["ex_list"]
+    IMG = img
+    last = str(last)
+    this_ex = ex_bank[last]
+    pic = this_ex["P"]
+    if pic:
+        state["pic_to_send"] = pic
+    else:
+        state["pic_to_send"] = None
+    this_answer = this_ex["A"]
+    state["this_answer"] = this_answer
+    this_answer_group = []
+    for i in this_ex:
+        if i in ["A", "B", "C", "D"]:
+            this_answer_group.append(this_ex[i])
+    this_answer_group = random.sample(this_answer_group, len(this_answer_group))
+    dic_to_send = {"Q": this_ex["Q"], "A": this_answer_group[0], "B": this_answer_group[1], "C": this_answer_group[2],
+                   "D": this_answer_group[3]}
+    state['this_send'] = dic_to_send
+    for i in dic_to_send:
+        if dic_to_send[i] == this_answer:
+            answer = i
+            state["this_answer"] = answer
+    reply = (
+        f"{last if not ex_list else ex_list.index(int(last)) + 1}、{dic_to_send['Q']}\n"
+        f"A. {dic_to_send['A']}\n"
+        f"B. {dic_to_send['B']}\n"
+        f"C. {dic_to_send['C']}\n"
+        f"D. {dic_to_send['D']}\n"
+    )
+    state_2 = {"this_config": state["this_config"], "correct": state["correct"], "wrong": state["wrong"]}
+
+    await write_(state_for_time, json.dumps(state_2))
+    if state["pic_to_send"]:
+        await matcher.send(MessageSegment.image(f"file:///{(IMG / state['pic_to_send']).absolute()}"))
+        await matcher.reject(reply)
+    else:
+        await matcher.reject(reply)
+    return state
