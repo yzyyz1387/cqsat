@@ -63,63 +63,99 @@ async def _(
     state["is_send"] = False
 
 
-@do_exercise.got("answer", prompt="回复任意内容开始...")
-async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer")):
-    level = state["level"]
-    qq = state["qq"]
-    last = state['last']
-    ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
-    if reply in ["取消", "算了", "退出", "不做了", "怎么退出"]:
-        temp = {qq: {"level": level, "last": last}}
-        await yaml_upload(EXERCISE_TEMP, temp)
+@do_exercise.got("level", prompt="请你要练习哪个等级的题目？（A B C）")
+async def _(
+        event: MessageEvent,
+        state: T_State,
+        answer=None,
+        level: str = ArgStr("level")):
+    qq = event.user_id
+    if not Path.exists(EXERCISE_TEMP):
+        await yaml_dump(EXERCISE_TEMP, {})
+    if level in ["取消", "算了"]:
         await do_exercise.finish("已取消操作...")
-    if state["is_send"]:
-        if reply.upper() in ["A", "B", "C", "D"]:
-            for i in range(len(ex_bank) - last):
-                # if state["this_send"][reply.upper()] != state["this_answer"]:
-                if reply.upper() != state["this_answer"]:
-                    await do_exercise.send("×")
-                    state = (
-                        await send_ex(
-                            matcher,
-                            ex_bank,
-                            last,
-                            qq,
-                            level,
-                            state,
-                            img=IMG,
-                            mode="exec"
-                        )
-                    )
-                elif reply.upper() == state["this_answer"]:
-                    last += 1
-                    state["last"] = last
-                    await do_exercise.send("√")
-                    state = (
-                        await send_ex(
-                            matcher,
-                            ex_bank,
-                            last,
-                            qq,
-                            level,
-                            state,
-                            img=IMG,
-                            mode="exec"
-                        )
-                    )
+    elif level.upper() not in ["A", "B", "C"]:
+        await do_exercise.reject("输入错误，请重新输入...")
+    elif level.upper() in ["A", "B", "C"]:
+        state['level'] = level.upper()
+        state['qq'] = qq
+    already_done = (await yaml_load(EXERCISE_TEMP))
+    if qq in already_done:
+        last = already_done[qq]['last']
+        last_level = already_done[qq]['level']
+        if level.upper() == last_level:
+            await do_exercise.send(f"你上次练习{last_level}到了{last}题,将继续练习")
         else:
-            await do_exercise.reject(state["user_notice"] + "输入错误，请重新输入...")
-    elif not state["is_send"]:
-        state["is_send"] = True
-        state = (
-            await send_ex(
-                matcher,
-                ex_bank,
-                last,
-                qq,
-                level,
-                state,
-                img=IMG,
-                mode="exec"
-            )
-        )
+            await do_exercise.send(
+                f"你上次练习的是{last_level},进度为 【{last}】 题，该进度已删除\n正开始{level.upper()}类题目的练习")
+            last = 1
+            temp = {qq: {"level": level, "last": 1}}
+            await yaml_upload(EXERCISE_TEMP, temp)
+    else:
+        last = 1
+        temp = {qq: {"level": level, "last": 1}}
+        await yaml_upload(EXERCISE_TEMP, temp)
+    state['last'] = last
+    state["is_send"] = False
+
+# FIXME 出了点问题但是看不懂13天前写的代码了...
+# @do_exercise.got("answer", prompt="回复任意内容开始...")
+# async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer")):
+#     level = state["level"]
+#     qq = state["qq"]
+#     last = state['last']
+#     ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
+#     if reply in ["取消", "算了", "退出", "不做了", "怎么退出"]:
+#         temp = {qq: {"level": level, "last": last}}
+#         await yaml_upload(EXERCISE_TEMP, temp)
+#         await do_exercise.finish("已取消操作...")
+#     if state["is_send"]:
+#         if reply.upper() in ["A", "B", "C", "D"]:
+#             for i in range(len(ex_bank) - last):
+#                 # if state["this_send"][reply.upper()] != state["this_answer"]:
+#                 if reply.upper() != state["this_answer"]:
+#                     await do_exercise.send("×")
+#                     state = (
+#                         await send_ex(
+#                             matcher,
+#                             ex_bank,
+#                             last,
+#                             qq,
+#                             level,
+#                             state,
+#                             img=IMG,
+#                             mode="exec"
+#                         )
+#                     )
+#                 elif reply.upper() == state["this_answer"]:
+#                     last += 1
+#                     state["last"] = last
+#                     await do_exercise.send("√")
+#                     state = (
+#                         await send_ex(
+#                             matcher,
+#                             ex_bank,
+#                             last,
+#                             qq,
+#                             level,
+#                             state,
+#                             img=IMG,
+#                             mode="exec"
+#                         )
+#                     )
+#         else:
+#             await do_exercise.reject(state["user_notice"] + "输入错误，请重新输入...")
+#     elif not state["is_send"]:
+#         state["is_send"] = True
+#         state = (
+#             await send_ex(
+#                 matcher,
+#                 ex_bank,
+#                 last,
+#                 qq,
+#                 level,
+#                 state,
+#                 img=IMG,
+#                 mode="exec"
+#             )
+#         )
