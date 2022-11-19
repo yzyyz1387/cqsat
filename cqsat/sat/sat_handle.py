@@ -14,7 +14,7 @@ from dateutil.parser import parse
 from nonebot import on_command, require
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, MessageSegment, MessageEvent
-from nonebot.adapters.onebot.exception import ActionFailed
+from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.internal.params import ArgStr
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
