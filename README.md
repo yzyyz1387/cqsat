@@ -84,7 +84,7 @@ nb plugin install nonebot-plugin-cqsat
 
 #### 数据来源
 
-- 目前只支持来自[http://www.cmse.gov.cn/gfgg/zgkjzgdcs/](http://www.cmse.gov.cn/gfgg/zgkjzgdcs/)的数据
+- 目前只支持来自[https://amsat.org/tle/current/nasabare.txt](https://amsat.org/tle/current/nasabare.txt)的数据
 - 还支持中国空间站，中国空间站TLE数据来自[中国载人航天官方](http://www.cmse.gov.cn/gfgg/zgkjzgdcs/)
 
 #### 使用时
