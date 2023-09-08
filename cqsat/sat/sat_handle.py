@@ -92,7 +92,7 @@ async def _(
         else:
             user_sat = sat.split(" ")
             if len(user_sat) == 1:
-                if sat.upper() in sat_s:
+                if sat or sat.upper() in sat_s:
                     state["sat"] = [sat.upper()]
                 else:
                     await sub.reject_arg("Sat", f"没有找到{sat},请重新输入：")
@@ -247,15 +247,18 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
     time = (datetime.utcnow() + timedelta(minutes=add)).strftime("%Y-%m-%d %H:%M:%S")
     send_time = (datetime.now() + timedelta(minutes=add)).strftime("%Y-%m-%d %H:%M:%S")
     if not isChinese(sat):
-        sat = sat.upper()
+        sat_ = sat.upper()
     else:
         sat_dict = (await get_tian_gong())
+    reply = "{sat}不存在"
     if sat in sat_dict:
         out = await calculate(sat, qth, time=time)
+    elif sat_ in sat_dict:
+        out = await calculate(sat_, qth, time=time)
+    if out:
         reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]), 2)}°\n方位角:{round(float(out[0]), 2)}°\n相对速率为：{round(float(out[2]), 2)} "
-        await specified.send(reply)
-    else:
-        await specified.send(f"{sat}不存在")
+    await specified.send(reply)
+
 
 
 async def aps():
