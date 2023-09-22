@@ -231,6 +231,10 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
     input_arg = str(args).split(" ")
     sat_dict = (await data2Tle())
     sat = input_arg[0]
+    sat_ = ""
+    out = []
+    if not sat:
+        await specified.finish("请发送 计算卫星 卫星名称 分钟数（可选）\n例如：\n计算卫星 AO-73 10\n计算卫星 AO-73")
     try:
         qth = (await yaml_load(QTH))[qq]
     except KeyError:
@@ -246,29 +250,39 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
         await specified.send(f"你没有发送时间，将计算 {sat} 现在的状态")
     time = (datetime.utcnow() + timedelta(minutes=add)).strftime("%Y-%m-%d %H:%M:%S")
     send_time = (datetime.now() + timedelta(minutes=add)).strftime("%Y-%m-%d %H:%M:%S")
-    if not isChinese(sat):
-        sat_ = sat.upper()
-    else:
-        sat_dict = (await get_tian_gong())
-    reply = "{sat}不存在"
-    if sat in sat_dict:
-        out = await calculate(sat, qth, time=time)
-    elif sat_ in sat_dict:
-        out = await calculate(sat_, qth, time=time)
-    if out:
-        reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]), 2)}°\n方位角:{round(float(out[0]), 2)}°\n相对速率为：{round(float(out[2]), 2)} "
-    await specified.send(reply)
 
+    # if sat in ["天宫", "天宫号", "中国空间站"] or sat.upper():
+    if isChinese(sat):
+        if sat in ['天宫', '天宫号', '中国空间站', '空间站', '天和', '核心舱']:
+            sat_dict = (await get_tian_gong())
+            sat = '天宫'
+        elif sat == '国际空间站':
+            pass
+    elif sat.upper() in ['TIANGONG', 'CSS', 'TIANHE']:
+        sat = '天宫'
+        sat_dict = (await get_tian_gong())
+    else:
+        sat = sat.upper()
+    reply = '{sat}不存在'
+    if sat in sat_dict:
+        if sat_dict[sat][1] == "<head>":
+            await specified.finish("通过celestrak下载天宫数据时被禁止，这通常是过量访问导致的，可尝试删除 cqsat/tle_cache/css.cache "
+                                   "文件，若不成功，可在两小时后再次删除此文件再试")
+        out = await calculate(sat, qth, time=time)
+        if out:
+            reply = f"对于QTH:：{qth}\n{sat} 在 {send_time} ：\n仰角为：{round(float(out[1]), 2)}°\n方位角:{round(float(out[0]), 2)}°\n相对速率为：{round(float(out[2]), 2)} "
+        else:
+            reply = '哪里出错了 QWQ'
+    await specified.send(reply)
 
 
 async def aps():
     if not Path.exists(CONFIG):
         return
-    elif read_all(CONFIG) == "":
+    elif (await read_all(CONFIG)) == "":
         return
     today = datetime.now().strftime("%Y-%m-%d")
     try:
-        # FIXME 目前是每次都下载
         await download_ham_sat()
         data = (await yaml_load(CONFIG))
     except FileNotFoundError:
@@ -285,9 +299,10 @@ async def aps():
                     last = parse("2001-11-04 00:00:00")
                 now_to_calculate = (datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
                 min_add = 10
-                if int((parse(now_to_calculate) - last).total_seconds() / 60) >= 60:
+                if int((parse(now_to_calculate) - last).total_seconds() / 60) >= 30:
                     now = (datetime.utcnow() + timedelta(minutes=min_add)).strftime("%Y-%m-%d %H:%M:%S")
-                    result = await calculate(sat, data[group][qq][sat]["qth"], now)
+                    qth = (await yaml_load(QTH))[qq]
+                    result = await calculate(sat, qth, now)
                     sated = []
                     if float(result[1]) > 0:
                         logger.info(f"@{qq} 订阅的 {sat} 将入境，正准备计算最高仰角")
@@ -295,11 +310,11 @@ async def aps():
                         az_list = []
                         alt_list = []
                         time_highest_point = {}
-                        result_ = await calculate(sat, data[group][qq][sat]["qth"], now)
+                        result_ = await calculate(sat, qth, now)
                         while float(result_[1]) >= 0:
                             now = (datetime.utcnow() + timedelta(minutes=min_add + int(i))).strftime(
                                 "%Y-%m-%d %H:%M:%S")
-                            result_ = await calculate(sat, data[group][qq][sat]["qth"], now)
+                            result_ = await calculate(sat, qth, now)
                             i += 1
                             az_list.append(float(result_[0]))
                             alt_list.append(float(result_[1]))
@@ -334,7 +349,8 @@ async def aps():
                         else:
                             logger.info("最高仰角小于用户设定的值，不需要提醒")
                 else:
-                    logger.info("一小时内该卫星已过境，跳过此卫星")
+                    logger.info("半小时内该卫星已过境，跳过此卫星")
+                    pass
 
 
 scheduler = require("nonebot_plugin_apscheduler").scheduler

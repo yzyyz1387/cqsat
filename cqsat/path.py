@@ -26,8 +26,12 @@ EXAM_CACHE = LOCAL / 'exam'
 EXAM_CACHE_A = EXAM_CACHE / 'A'
 EXAM_CACHE_B = EXAM_CACHE / 'B'
 EXAM_CACHE_C = EXAM_CACHE / 'C'
+TLE_CACHE_PATH = LOCAL / 'tle_cache'
+CACHE_CSS = TLE_CACHE_PATH / 'css.cache'
+CACHE_OTHER = TLE_CACHE_PATH / 'other.cache'
 
-path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C]
+
+path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C, TLE_CACHE_PATH]
 driver = get_driver()
 global_config = driver.config
 
