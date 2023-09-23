@@ -356,3 +356,17 @@ async def aps():
 scheduler = require("nonebot_plugin_apscheduler").scheduler
 
 scheduler.add_job(aps, 'cron', minute="0/1", id="sat")
+
+# 定时任务
+
+query_tevel = on_command("/小火车", aliases={"/t", "/查询小火车"}, block=True)
+
+
+@query_tevel.handle()
+async def query_tevel_(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
+    url = "https://www.df2et.de/tevel/"
+    await shoot_scr(url, img_output=SHOOTS_OUT_PATH / "tevel.png")
+    try:
+        await query_tevel.send(MessageSegment.image(f"file:///{Path(SHOOTS_OUT_PATH / 'tevel.png').resolve()}"))
+    except:
+        await query_tevel.send("图片发送失败，哪里出错了？")

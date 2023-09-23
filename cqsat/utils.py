@@ -242,3 +242,11 @@ async def send_ex(
     else:
         await matcher.reject(state["user_notice"] + reply)
     return state
+
+
+async def shoot_scr(url, locator="html", img_output="out.png"):
+    browser = await browser_init()
+    context = await browser.new_context(locale="zh-CN")
+    page = await context.new_page()
+    await page.goto(url)
+    await page.locator(locator).screenshot(path=img_output)
