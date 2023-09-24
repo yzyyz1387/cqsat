@@ -250,3 +250,4 @@ async def shoot_scr(url, locator="html", img_output="out.png"):
     page = await context.new_page()
     await page.goto(url)
     await page.locator(locator).screenshot(path=img_output)
+    await browser.close()
