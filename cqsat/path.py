@@ -32,9 +32,10 @@ TLE_CACHE_PATH = LOCAL / 'tle_cache'
 CACHE_CSS = TLE_CACHE_PATH / 'css.cache'
 CACHE_OTHER = TLE_CACHE_PATH / 'other.cache'
 SHOOTS_OUT_PATH = LOCAL / 'shoots_out'
+MDC_GENERATOR_PATH = LOCAL / 'mdc_generator'
 
 
-path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C, TLE_CACHE_PATH, SHOOTS_OUT_PATH]
+path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C, TLE_CACHE_PATH, SHOOTS_OUT_PATH, MDC_GENERATOR_PATH]
 driver = get_driver()
 global_config = driver.config
 

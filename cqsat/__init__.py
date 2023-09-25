@@ -7,11 +7,14 @@
 # @Software: PyCharm
 from . import (
     exercise,
+    entertainment,
     mgsl,
     sat,
+    config,
     log,
     path,
-    utils
+    utils,
+    media_utils
                )
 from nonebot.plugin import PluginMetadata
 

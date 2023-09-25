@@ -242,6 +242,7 @@ async def send_ex(
     else:
         await matcher.reject(state["user_notice"] + reply)
     return state
+    # FIXME 此处return无法访问，但是能跑？
 
 
 async def shoot_scr(url, locator="html", img_output="out.png"):
@@ -251,3 +252,21 @@ async def shoot_scr(url, locator="html", img_output="out.png"):
     await page.goto(url)
     await page.locator(locator).screenshot(path=img_output)
     await browser.close()
+
+
+def MsgText(data: str):
+    """
+    返回消息文本段内容(即去除 cq 码后的内容)
+    :param data: event.json()
+    :return: str
+    """
+    try:
+        data = json.loads(data)
+        # 过滤出类型为 text 的【并且过滤内容为空的】
+        msg_text_list = filter(lambda x: x['type'] == 'text' and x['data']['text'].replace(' ', '') != '',
+                               data['message'])
+        # 拼接成字符串并且去除两端空格
+        msg_text = ' '.join(map(lambda x: x['data']['text'].strip(), msg_text_list)).strip()
+        return msg_text
+    except:
+        return ''

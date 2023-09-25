@@ -30,7 +30,7 @@ Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
 bind_qth = on_command("绑定位置", aliases={"绑定QTH", "绑Qth", "绑定qth"}, block=True)
 
 
-@bind_qth.got("QTH", prompt="请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
+@bind_qth.got("QTH", prompt="请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n\n发送【取消】来取消操作")
 async def _(
         event: MessageEvent,
         state: T_State,
@@ -71,7 +71,7 @@ async def _(
 sub = on_command("订阅卫星", priority=2, block=True)
 
 
-@sub.got("Sat", prompt="你要订阅那颗卫星？\n多颗卫星用空格分隔")
+@sub.got("Sat", prompt="你要订阅那颗卫星？\n多颗卫星用空格分隔\n发送【取消】来取消操作")
 async def _(
         event: GroupMessageEvent,
         state: T_State,
@@ -110,7 +110,7 @@ async def _(
         await sub.finish("请先发送【绑定位置】来绑定QTH\n绑定后可以发送【订阅卫星】来订阅卫星")
 
 
-@sub.got("E_angle", prompt="请输入最低仰角：")
+@sub.got("E_angle", prompt="请输入最低仰角：\n发送【取消】来取消操作")
 async def _(
         event: GroupMessageEvent,
         state: T_State,

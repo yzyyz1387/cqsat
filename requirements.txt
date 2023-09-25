@@ -5,3 +5,10 @@ pyephem==9.99
 python_dateutil==2.8.2
 PyYAML==6.0
 nonebot-plugin-apscheduler
+av
+pilk
+pysilk
+pysilk-mod
+soundfile
+librosa
+pydub
