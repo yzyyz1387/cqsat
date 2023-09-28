@@ -95,10 +95,11 @@ async def download_css_data():
 async def download_ham_sat():
     Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
     await get_tian_gong()
-    logger.debug("读取在线数据...")
+
     url = "https://amsat.org/tle/current/nasabare.txt"
     if timeCompare(CACHE_OTHER, DATA_DICT):
-        ham_sat_ = await http_get(url)
+        logger.info("读取在线数据...")
+        ham_sat_ = await http_get(url, type_='json')
         if not ham_sat_:
             logger.error(f"从 {url} 下载数据出错")
             return None
@@ -108,6 +109,7 @@ async def download_ham_sat():
             CACHE_OTHER.touch()
             return ham_sat_
     else:
+        logger.info("读取本地数据...")
         ham_sat_ = json.loads(await read_all(DATA_DICT))
         return ham_sat_
 
@@ -118,6 +120,7 @@ async def data2Tle() -> Dict[str, list]:
     :return:
     """
     content = await download_ham_sat()
+    content = {k.upper(): v for k, v in content.items()}
     if type(content) == dict:
         return content
     else:
@@ -151,6 +154,7 @@ async def calculate(name: str, location: list, time=ephem.now()) -> Optional[lis
 
     me = ephem.Observer()
     me.lon, me.lat, me.elevation = location[0], location[1], float(location[2])
+    tle = (await data2Tle())
     if isChinese(name):
         if name in ['天宫', '天宫号', '中国空间站', '空间站', '天和', '核心舱']:
             tle = (await get_tian_gong())
@@ -162,8 +166,6 @@ async def calculate(name: str, location: list, time=ephem.now()) -> Optional[lis
             name = "天宫"
             if tle[name][1] == "<head>":
                 raise AccessError
-        else:
-            tle = (await data2Tle())
     try:
         sat = ephem.readtle(name, tle[name][0], tle[name][1])
         me.date = time

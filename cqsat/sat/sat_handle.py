@@ -92,10 +92,11 @@ async def _(
         else:
             user_sat = sat.split(" ")
             if len(user_sat) == 1:
-                if sat or sat.upper() in sat_s:
+                if sat in sat_s or sat.upper() in sat_s:
                     state["sat"] = [sat.upper()]
                 else:
-                    await sub.reject_arg("Sat", f"没有找到{sat},请重新输入：")
+                    await sub.reject_arg("Sat",
+                                         f"没有找到{sat},请重新输入：\n\n输入【算了】取消操作\n输入【卫星列表】查看收录卫星")
             else:
                 temp = []
                 for sat_ in user_sat:
@@ -104,7 +105,7 @@ async def _(
                     elif sat_.upper() in sat_s:
                         temp.append(sat_.upper())
                     else:
-                        await sub.send(f"没有找到{sat_}")
+                        await sub.send(f"没有找到{sat_}，\n输入【卫星列表】查看收录卫星")
                 state["sat"] = temp
     else:
         await sub.finish("请先发送【绑定位置】来绑定QTH\n绑定后可以发送【订阅卫星】来订阅卫星")
@@ -218,8 +219,39 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
     sat_list = []
     for i in sat_dict.keys():
         sat_list.append(i)
-    reply = "\n".join(sat_list)
-    await refer_sat.send(f"卫星列表：\n{reply}")
+    sat_list = [sat_list[i:i + 50] for i in range(0, len(sat_list), 50)]
+    messages = []
+    for sat in sat_list:
+        reply = "\n".join(sat)
+        messages.append(reply)
+    if isinstance(event, GroupMessageEvent):
+        await bot.send_group_forward_msg(
+            group_id=event.group_id,
+            messages=[
+                {
+                    "type": "node",
+                    "data": {
+                        "name": "卫星列表",
+                        "uin": bot.self_id,
+                        "content": r
+                    },
+                }
+                for r in messages
+            ])
+    else:
+        await bot.send_private_forward_msg(
+            user_id=bot.self_id,
+            messages=[
+                {
+                    "type": "node",
+                    "data": {
+                        "name": "卫星列表",
+                        "uin": bot.self_id,
+                        "content": r
+                    },
+                }
+                for r in messages
+            ])
 
 
 specified = on_command("查询卫星", aliases={"计算卫星"}, block=True)
@@ -287,6 +319,7 @@ async def aps():
         data = (await yaml_load(CONFIG))
     except FileNotFoundError:
         data = await download_ham_sat()
+        # FIXME ↑？？？
 
     for group in data:
         for qq in data[group]:
@@ -364,9 +397,10 @@ query_tevel = on_command("/小火车", aliases={"/t", "/查询小火车"}, block
 
 @query_tevel.handle()
 async def query_tevel_(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
-    url = "https://www.df2et.de/tevel/"
-    await shoot_scr(url, img_output=SHOOTS_OUT_PATH / "tevel.png")
-    try:
-        await query_tevel.send(MessageSegment.image(f"file:///{Path(SHOOTS_OUT_PATH / 'tevel.png').resolve()}"))
-    except:
-        await query_tevel.send("图片发送失败，哪里出错了？")
+    if not args:
+        url = "https://www.df2et.de/tevel/"
+        await shoot_scr(url, img_output=SHOOTS_OUT_PATH / "tevel.png")
+        try:
+            await query_tevel.send(MessageSegment.image(f"file:///{Path(SHOOTS_OUT_PATH / 'tevel.png').resolve()}"))
+        except:
+            await query_tevel.send("图片发送失败，哪里出错了？")

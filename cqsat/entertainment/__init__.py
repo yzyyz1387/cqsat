@@ -41,7 +41,7 @@ async def _(event: Event, state: T_State, args: Message = CommandArg()):
 
 # @itsevin
 # from https://github.com/itsevin/nonebot_plugin_record/blob/main/nonebot_plugin_record/__init__.py
-@voice_synthesis.got("recording", prompt="请发送语音")
+@voice_synthesis.got("recording", prompt="请发送语音\n发送【取消】取消操作")
 async def _(bot: Bot, event: MessageEvent, state: T_State):
     mdc_list = [item for item in (VOICES / 'suffix').iterdir() if item.is_file()]
     prefixes_path = (VOICES / 'prefix' / 'unknown_pre.mp3').absolute() if state.get("prefix", False) else None
