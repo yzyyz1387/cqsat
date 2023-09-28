@@ -208,6 +208,16 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
+### 查看Tevel系列卫星截图
+- 发送`/t` 即可查看网站https://www.df2et.de/tevel/的截图
+
+
+### 娱乐信令
+- 发送`/v` ，根据提示回复一条语音，即可对该语音加上信令音
+- 可选参数
+  - `-p` 加前置音 例如：`/v -p`
+  - `-n[数字]` 加噪音 例如：`/v -n5`
+
 ### 网格 【私聊、群内】
 
 - 发送 `我的网格` 查询用户绑定qth的网格
@@ -259,6 +269,7 @@ nb plugin install nonebot-plugin-cqsat
 - [ ]  刷题错误记录、常错记录
 - [ ]  模拟考试
 - [ ]  卫星状态、卫星列表加入图片支持
+- [ ]  [#5](https://github.com/yzyyz1387/cqsat/issues/5)
 
 ## 参考资料
 
