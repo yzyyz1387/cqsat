@@ -32,6 +32,7 @@ TLE_CACHE_PATH = LOCAL / 'tle_cache'
 CACHE_CSS = TLE_CACHE_PATH / 'css.cache'
 CACHE_OTHER = TLE_CACHE_PATH / 'other.cache'
 SHOOTS_OUT_PATH = LOCAL / 'shoots_out'
+SHOOTS_URL_BANK = LOCAL / 'shoots_url_bank.json'
 MDC_GENERATOR_PATH = LOCAL / 'mdc_generator'
 
 
