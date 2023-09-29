@@ -54,15 +54,26 @@ async def query_tevel_(bot: Bot, event: MessageEvent, state: T_State, args: Mess
                     time_out = item.get("time_out", 0)
                     proxy = item.get("proxy", None)
                     timeout = item.get("timeout", 30000)
+                    until = item.get("until", "load")
                     if path.exists():
                         last_time = datetime.fromtimestamp(path.stat().st_mtime)
                         TIME_NOW = (datetime.now())
                         TIME_DIFF = TIME_NOW - last_time
                         if TIME_DIFF > timedelta(minutes=float(time_out)):
                             logger.info("超时，重新截图")
-                            await shoot_scr(url, locator=locator, img_output=path, proxy=proxy, timeout=timeout)
+                            await shoot_scr(url,
+                                            locator=locator,
+                                            img_output=path,
+                                            proxy=proxy,
+                                            timeout=timeout,
+                                            until=until)
                     else:
-                        await shoot_scr(url, locator=locator, img_output=path, proxy=proxy, timeout=timeout)
+                        await shoot_scr(url,
+                                        locator=locator,
+                                        img_output=path,
+                                        proxy=proxy,
+                                        timeout=timeout,
+                                        until=until)
                     try:
                         await shoot_web.send(MessageSegment.image(f"file:///{Path(path).resolve()}"))
                     except Exception as e:
@@ -91,7 +102,8 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             for arg in args:
                 if "=" in arg:
                     arg = arg.split("=")
-                    keyword_[arg[0]] = (arg[1]).replace(" ","").replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
+                    keyword_[arg[0]] = (arg[1]).replace(" ", "").replace("&#93;", "]").replace("&#91;", "[").replace(
+                        "&#61;", "=")
             if keyword_:
                 if not keyword_.get("url", None) or not keyword_.get("cmd", None) or not keyword_.get("path", None):
                     await bank_handle.finish("参数错误：\n/截图add url=xxx cmd=xxx path=xxx locator=xxx time_out=123 "
@@ -105,7 +117,8 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             for arg in args:
                 if "=" in arg:
                     arg = arg.split("=")
-                    keyword_[arg[0]] = arg[1].replace(" ","").replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
+                    keyword_[arg[0]] = arg[1].replace(" ", "").replace("&#93;", "]").replace("&#91;", "[").replace(
+                        "&#61;", "=")
             if keyword_:
                 if url_bank.remove(**keyword_):
                     await bank_handle.finish("删除成功")

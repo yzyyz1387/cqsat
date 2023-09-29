@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import json
 import random
-from typing import Union, Optional, TextIO, Iterable
+from typing import Union, Optional, TextIO, Iterable, Literal
 
 import httpx
 import yaml
@@ -267,7 +267,12 @@ async def send_ex(
     # FIXME 此处return无法访问，但是能跑？
 
 
-async def shoot_scr(url, locator="html", img_output="out.png", proxy=None, timeout=30000) -> None:
+async def shoot_scr(url,
+                    locator="html",
+                    img_output="out.png",
+                    proxy=None,
+                    timeout=30000,
+                    until: Literal["commit", "domcontentloaded", "load", "networkidle"] = "load") -> None:
     """
     网页截图
     :param url: 地址
@@ -275,6 +280,7 @@ async def shoot_scr(url, locator="html", img_output="out.png", proxy=None, timeo
     :param img_output: 输出路径
     :param proxy: 代理地址
     :param timeout: 超时时间
+    :param until: 等待条件
     :return:
     """
     browser = await browser_init()
@@ -283,7 +289,7 @@ async def shoot_scr(url, locator="html", img_output="out.png", proxy=None, timeo
     else:
         context = await browser.new_context(locale="zh-CN")
     page = await context.new_page()
-    await page.goto(url, timeout=timeout, wait_until="networkidle")
+    await page.goto(url, timeout=timeout, wait_until=until)
     await page.locator(locator).screenshot(path=img_output)
     await browser.close()
 

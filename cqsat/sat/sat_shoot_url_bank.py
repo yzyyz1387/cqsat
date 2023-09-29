@@ -44,7 +44,9 @@ url_bank = [
         "cmd": ['css', 'cs'],
         "path": "css.png",
         "locator": "html",
-        "time_out": 0
+        "time_out": 0,
+        "proxy": plugin_config.sat_proxy_url,
+        "until": "networkidle",
     }
 
 ]
