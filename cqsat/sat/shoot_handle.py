@@ -91,7 +91,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             for arg in args:
                 if "=" in arg:
                     arg = arg.split("=")
-                    keyword_[arg[0]] = (arg[1]).replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
+                    keyword_[arg[0]] = (arg[1]).replace(" ","").replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
             if keyword_:
                 if not keyword_.get("url", None) or not keyword_.get("cmd", None) or not keyword_.get("path", None):
                     await bank_handle.finish("参数错误：\n/截图add url=xxx cmd=xxx path=xxx locator=xxx time_out=123 "
@@ -105,10 +105,12 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             for arg in args:
                 if "=" in arg:
                     arg = arg.split("=")
-                    keyword_[arg[0]] = arg[1].replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
+                    keyword_[arg[0]] = arg[1].replace(" ","").replace("&#93;", "]").replace("&#91;", "[").replace("&#61;", "=")
             if keyword_:
-                url_bank.remove(**keyword_)
-                await bank_handle.finish("删除成功")
+                if url_bank.remove(**keyword_):
+                    await bank_handle.finish("删除成功")
+                else:
+                    await bank_handle.finish(f"没有找到{keyword_}")
             else:
                 await bank_handle.finish("参数错误：\n/截图del url=xxx cmd=xxx path=xxx"
                                          "...\n必须包含url、cmd、path其中之一")

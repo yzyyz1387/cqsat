@@ -66,14 +66,19 @@ class UrlBank:
         json_upload(SHOOTS_URL_BANK, url_bank)
 
     def remove(self, **kwargs):
-        url = kwargs.get("url", None)
-        cmd = kwargs.get("cmd", None)
-        path = kwargs.get("path", None)
+        url = kwargs.get("url", " ")
+        cmd = kwargs.get("cmd", " ")
+        path = kwargs.get("path", " ")
+        result = False
         for item in self.url_bank:
             if url in item["url"] or cmd in item["cmd"] or path in item["path"]:
+                logger.info(f"删除{item}")
                 self.url_bank.remove(item)
                 json_upload(SHOOTS_URL_BANK, self.url_bank)
-                return True
+                result = True
+            else:
+                result = False
+        return result
 
     @staticmethod
     def default():
