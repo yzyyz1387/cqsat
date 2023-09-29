@@ -18,6 +18,7 @@ from nonebot.params import CommandArg
 from nonebot.permission import SUPERUSER
 from nonebot.typing import T_State
 
+from ..mgsl import getGrid
 from .calculate_sat import download_ham_sat, data2Tle, calculate, get_tian_gong
 from .sat_shoot_url_bank import *
 from ..log import log
@@ -144,36 +145,54 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             await bank_handle.finish("恢复默认成功")
 
 
-sat_match = on_command("/计算", aliases={"/satmatch", "/约", "/匹配"}, block=True)
+sat_match = on_command("/约", aliases={"/satmatch", "/匹配"}, block=True)
 
 
 @sat_match.handle()
 async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
+    qq = event.user_id
+    qth = await getQth(qq)
+    sat, obs1, obs2, this_png = None, None, None, None
     if not args:
-        await sat_match.finish("请输入参数：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
+        await sat_match.finish("请输入参数：\n/约 卫星,卫星 网格1 网格2\n例如：/约 iss,so-50 OM44 OM48")
     else:
         args = str(args).strip().split(" ")
-        if len(args) >= 2:
+        if len(args) == 2:
+            if qth is None:
+                await sat_match.finish(
+                    "你可能只输入了一个网格，此时我会根据你的网格和你输入的网格进行匹配\n但看起来你还没有设置QTH,可以发送【绑定位置】来绑定QH")
+            sat = args[0].upper()
+            obs1 = await getGrid(float(qth[0]), float(qth[1]))
+            obs2 = args[1].upper()
+            this_png = await sat_match_scr(sat, obs1, obs2)
+
+        elif len(args) >= 3:
             sat = args[0].upper()
             obs1 = args[1].upper()
             obs2 = args[2].upper()
-            url = f"https://www.satmatch.com/satellite/{sat}/obs1/{obs1}/obs2/{obs2}"
-            async with httpx.AsyncClient() as client:
-                r = (await client.get(url))
-                if r.status_code == 400:
-                    await sat_match.finish(
-                        "有什么出错了~：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
-            logger.info(url)
-            this_png = SHOOTS_OUT_PATH / f"satmatch{datetime.now()}.png"
-            await shoot_scr(url,
-                            img_output=this_png,
-                            proxy=plugin_config.sat_proxy_url,
-                            locator="html",
-                            until="networkidle")
-            try:
-                await sat_match.send(MessageSegment.image(f"file:///{Path(this_png).resolve()}"))
-                this_png.unlink()
-            except ActionFailed:
-                await sat_match.finish("图片发送失败，哪里出错了？")
+            this_png = await sat_match_scr(sat, obs1, obs2)
         else:
-            await sat_match.finish("参数错误：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
+            await sat_match.finish("参数错误：\n/约 卫星,卫星 网格1 网格2\n若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 iss,so-50 OM44 OM48")
+        try:
+            await sat_match.send(f"{obs1} 和 {obs2} 通过 {sat}的通联可能性预测\n" + MessageSegment.image(
+                f"file:///{Path(this_png).resolve()}"))
+            this_png.unlink()
+        except ActionFailed:
+            await sat_match.finish("图片发送失败，哪里出错了？")
+
+
+async def sat_match_scr(sat, obs1, obs2):
+    url = f"https://www.satmatch.com/satellite/{sat}/obs1/{obs1}/obs2/{obs2}"
+    async with httpx.AsyncClient() as client:
+        r = (await client.get(url))
+        if r.status_code == 400:
+            await sat_match.finish(
+                "有什么出错了~\n请检查卫星名/网格的输入吧~\n/约 卫星,卫星 网格1 网格2\n若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 iss,so-50 OM44 OM48")
+    logger.info(url)
+    this_png = SHOOTS_OUT_PATH / f"satmatch{datetime.now()}.png"
+    await shoot_scr(url,
+                    img_output=this_png,
+                    proxy=plugin_config.sat_proxy_url,
+                    locator="html",
+                    until="networkidle")
+    return this_png
