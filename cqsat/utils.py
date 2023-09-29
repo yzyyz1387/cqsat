@@ -7,11 +7,11 @@
 # @Software: PyCharm
 import json
 import random
-from typing import Union, Optional, TextIO
+from typing import Union, Optional, TextIO, Iterable
 
 import httpx
 import yaml
-from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, GroupMessageEvent, Bot
 from nonebot.matcher import Matcher
 
 from .log import log
@@ -54,7 +54,7 @@ async def http_post(url: str, data: dict) -> str:
         return ""
 
 
-async def write_(path: str, data: str) -> None:
+async def write_(path: Union[Path, str], data: str) -> None:
     """
     写入文件
     :param path: 文件路径
@@ -63,7 +63,29 @@ async def write_(path: str, data: str) -> None:
     """
     with open(path, 'w', encoding='utf-8') as f:
         f.write(data)
-        f.close()
+
+
+def json_load(path) -> Optional[dict]:
+    """
+    加载json文件
+    :return: Optional[dict]
+    """
+    try:
+        with open(path, mode='r', encoding='utf-8') as f:
+            contents = json.load(f)
+            return contents
+    except FileNotFoundError:
+        return None
+
+
+def json_upload(path, dict_content) -> None:
+    """
+    更新json文件
+    :param path: 路径
+    :param dict_content: python对象，字典
+    """
+    with open(path, mode='w', encoding='utf-8') as c:
+        c.write(json.dumps(dict_content, ensure_ascii=False, indent=2))
 
 
 async def read_(path: Union[Path, str]) -> TextIO:
@@ -245,11 +267,23 @@ async def send_ex(
     # FIXME 此处return无法访问，但是能跑？
 
 
-async def shoot_scr(url, locator="html", img_output="out.png"):
+async def shoot_scr(url, locator="html", img_output="out.png", proxy=None, timeout=30000) -> None:
+    """
+    网页截图
+    :param url: 地址
+    :param locator: 定位器
+    :param img_output: 输出路径
+    :param proxy: 代理地址
+    :param timeout: 超时时间
+    :return:
+    """
     browser = await browser_init()
-    context = await browser.new_context(locale="zh-CN")
+    if proxy:
+        context = await browser.new_context(locale="zh-CN", proxy={"server": proxy})
+    else:
+        context = await browser.new_context(locale="zh-CN")
     page = await context.new_page()
-    await page.goto(url)
+    await page.goto(url, timeout=timeout, wait_until="networkidle")
     await page.locator(locator).screenshot(path=img_output)
     await browser.close()
 
@@ -270,3 +304,42 @@ def MsgText(data: str):
         return msg_text
     except:
         return ''
+
+
+async def send_forward_msg(bot: Bot, event: MessageEvent, nickname: str, messages: Iterable):
+    """
+    转发消息
+    :param bot: Bot
+    :param event: event
+    :param nickname: 昵称
+    :param messages: 可迭代消息组
+    :return:
+    """
+    if isinstance(event, GroupMessageEvent):
+        await bot.send_group_forward_msg(
+            group_id=event.group_id,
+            messages=[
+                {
+                    "type": "node",
+                    "data": {
+                        "name": nickname,
+                        "uin": bot.self_id,
+                        "content": r
+                    },
+                }
+                for r in messages
+            ])
+    else:
+        await bot.send_private_forward_msg(
+            user_id=bot.self_id,
+            messages=[
+                {
+                    "type": "node",
+                    "data": {
+                        "name": nickname,
+                        "uin": bot.self_id,
+                        "content": r
+                    },
+                }
+                for r in messages
+            ])

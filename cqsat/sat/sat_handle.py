@@ -224,34 +224,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
     for sat in sat_list:
         reply = "\n".join(sat)
         messages.append(reply)
-    if isinstance(event, GroupMessageEvent):
-        await bot.send_group_forward_msg(
-            group_id=event.group_id,
-            messages=[
-                {
-                    "type": "node",
-                    "data": {
-                        "name": "卫星列表",
-                        "uin": bot.self_id,
-                        "content": r
-                    },
-                }
-                for r in messages
-            ])
-    else:
-        await bot.send_private_forward_msg(
-            user_id=bot.self_id,
-            messages=[
-                {
-                    "type": "node",
-                    "data": {
-                        "name": "卫星列表",
-                        "uin": bot.self_id,
-                        "content": r
-                    },
-                }
-                for r in messages
-            ])
+    await send_forward_msg(bot, event, "收录卫星列表", messages)
 
 
 specified = on_command("查询卫星", aliases={"计算卫星"}, block=True)
@@ -315,11 +288,10 @@ async def aps():
         return
     today = datetime.now().strftime("%Y-%m-%d")
     try:
-        await download_ham_sat()
+
         data = (await yaml_load(CONFIG))
     except FileNotFoundError:
-        data = await download_ham_sat()
-        # FIXME ↑？？？
+        data = await data2Tle()
 
     for group in data:
         for qq in data[group]:
@@ -392,15 +364,4 @@ scheduler.add_job(aps, 'cron', minute="0/1", id="sat")
 
 # 定时任务
 
-query_tevel = on_command("/小火车", aliases={"/t", "/查询小火车"}, block=True)
 
-
-@query_tevel.handle()
-async def query_tevel_(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
-    if not args:
-        url = "https://www.df2et.de/tevel/"
-        await shoot_scr(url, img_output=SHOOTS_OUT_PATH / "tevel.png")
-        try:
-            await query_tevel.send(MessageSegment.image(f"file:///{Path(SHOOTS_OUT_PATH / 'tevel.png').resolve()}"))
-        except:
-            await query_tevel.send("图片发送失败，哪里出错了？")

@@ -208,15 +208,36 @@ nb plugin install nonebot-plugin-cqsat
 
 </details>
 
-### 查看Tevel系列卫星截图
-- 发送`/t` 即可查看网站https://www.df2et.de/tevel/的截图
+### 查看相关网页截图
+- 发送`/s` 即可查看相关网站的截图 例如 `/s t a`
+  - t https://www.df2et.de/tevel/ 
+  - a https://amsat.org/status/index.php
+  - css https://sathunt.com/
+  - home https://github.com/yzyyz1387/cqsat
+  - [ ]...
+  - 机器人superuser可使用/截图指令
 
+### /截图
+- 机器人superuser可使用/截图指令
+  - `/截图 add url=xxx path=xxx cmd=xxx proxy=xxx **kwargs`
+    - url: 截图网址
+    - path: 截图保存路径
+    - cmd: 截图命令
+    - kwargs: 其他参数
+    - 若要使用代理，请在机器人`.env.*`配置`sat_proxy_url=http://xx:port`
+  - `/截图 del url=xxx path=xxx cmd=xxx`
+    - url /path /cmd 其中之一即可
+  - `/截图 get`
+    - 查看当收录的截图支持列表
+  - `/截图 default`
+    - 恢复默认
 
 ### 娱乐信令
 - 发送`/v` ，根据提示回复一条语音，即可对该语音加上信令音
 - 可选参数
   - `-p` 加前置音 例如：`/v -p`
   - `-n[数字]` 加噪音 例如：`/v -n5`
+  - 使用示例: `/v -n5 -p` 
 
 ### 网格 【私聊、群内】
 

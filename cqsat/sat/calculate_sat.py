@@ -95,22 +95,21 @@ async def download_css_data():
 async def download_ham_sat():
     Path.mkdir(LOCAL) if not Path.exists(LOCAL) else ...
     await get_tian_gong()
-
     url = "https://amsat.org/tle/current/nasabare.txt"
     if timeCompare(CACHE_OTHER, DATA_DICT):
         logger.info("读取在线数据...")
-        ham_sat_ = await http_get(url, type_='json')
+        ham_sat_ = (await http_get(url))
         if not ham_sat_:
             logger.error(f"从 {url} 下载数据出错")
             return None
         else:
             logger.debug("写入本地数据...")
-            await write_(DATA_DICT, json.dumps(str(ham_sat_), ensure_ascii=False))
+            await write_(HAM_SAT, ham_sat_)
             CACHE_OTHER.touch()
             return ham_sat_
     else:
         logger.info("读取本地数据...")
-        ham_sat_ = json.loads(await read_all(DATA_DICT))
+        ham_sat_ = await read_all(HAM_SAT)
         return ham_sat_
 
 
@@ -119,25 +118,23 @@ async def data2Tle() -> Dict[str, list]:
     将在线数据转换成TLE轨道报
     :return:
     """
-    content = await download_ham_sat()
-    content = {k.upper(): v for k, v in content.items()}
-    if type(content) == dict:
-        return content
-    else:
-        logger.info("载入卫星TLE数据...")
-        count = 0
-        data = {}
-        temp = []
-        # 将数据分割成行TLE轨道报
-        for line in content.split('\n'):
-            count += 1
-            temp.append(line)
-            if count % 3 == 0:
-                data[temp[0]] = temp[1:]
-                count = 0
-                temp = []
-        await write_(DATA_DICT, json.dumps(data, ensure_ascii=False))
-        return data
+    (await download_ham_sat())
+    content = await read_all(HAM_SAT)
+    logger.info("载入卫星TLE数据...")
+    count = 0
+    data = {}
+    temp = []
+    # 将数据分割成行TLE轨道报
+    for line in content.split('\n'):
+        count += 1
+        temp.append(line)
+        if count % 3 == 0:
+            data[temp[0]] = temp[1:]
+            count = 0
+            temp = []
+    await write_(DATA_DICT, json.dumps(str(data), ensure_ascii=False))
+    data = {k.upper(): v for k, v in data.items()}
+    return data
 
 
 async def calculate(name: str, location: list, time=ephem.now()) -> Optional[list]:

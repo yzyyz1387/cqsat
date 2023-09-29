@@ -14,6 +14,7 @@ from pydantic import BaseModel, Extra
 class Config(BaseModel, extra=Extra.ignore):
     nonebot_plugin_go_cqhttp: Optional[bool] = False
     go_cqhttp_path: Optional[str] = './'
+    sat_proxy_url: Optional[str] = None
 
 
 global_config = get_driver().config
