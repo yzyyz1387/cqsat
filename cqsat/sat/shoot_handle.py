@@ -8,6 +8,7 @@
 import re
 from datetime import datetime, timedelta
 
+import httpx
 from nonebot import on_command, require
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, MessageSegment, MessageEvent
@@ -141,3 +142,38 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
         elif args[0] == "default":
             url_bank.default()
             await bank_handle.finish("恢复默认成功")
+
+
+sat_match = on_command("/计算", aliases={"/satmatch", "/约", "/匹配"}, block=True)
+
+
+@sat_match.handle()
+async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
+    if not args:
+        await sat_match.finish("请输入参数：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
+    else:
+        args = str(args).strip().split(" ")
+        if len(args) >= 2:
+            sat = args[0].upper()
+            obs1 = args[1].upper()
+            obs2 = args[2].upper()
+            url = f"https://www.satmatch.com/satellite/{sat}/obs1/{obs1}/obs2/{obs2}"
+            async with httpx.AsyncClient() as client:
+                r = (await client.get(url))
+                if r.status_code == 400:
+                    await sat_match.finish(
+                        "有什么出错了~：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
+            logger.info(url)
+            this_png = SHOOTS_OUT_PATH / f"satmatch{datetime.now()}.png"
+            await shoot_scr(url,
+                            img_output=this_png,
+                            proxy=plugin_config.sat_proxy_url,
+                            locator="html",
+                            until="networkidle")
+            try:
+                await sat_match.send(MessageSegment.image(f"file:///{Path(this_png).resolve()}"))
+                this_png.unlink()
+            except ActionFailed:
+                await sat_match.finish("图片发送失败，哪里出错了？")
+        else:
+            await sat_match.finish("参数错误：\n/计算 卫星,卫星 网格1 网格2\n例如：/计算 iss,so-50 OM44 OM48")
