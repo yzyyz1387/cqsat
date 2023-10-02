@@ -41,7 +41,6 @@ async def _(
     if qth in ["取消", "算了"]:
         await bind_qth.finish("已取消操作...")
     qth_list = str(qth).split(" ")
-    logger.info(len(qth_list))
     if len(qth_list) == 1:
         temp_list = await getLlByAd(qth_list[0], type_="str")
         if temp_list:
@@ -54,7 +53,6 @@ async def _(
         await bind_qth.reject_arg("QTH",
                                   "你的输入貌似有错误呢，请输入：\n  地名 \n或者输入：\n   经度 纬度 海拔\n\n参数用空格分隔\n")
     # else:
-    logger.info(qth_list)
     try:
         if float(qth_list[0]) and float(qth_list[1]) and float(qth_list[2]):
             state["qth"] = qth_list
@@ -116,27 +114,52 @@ async def _(
         event: GroupMessageEvent,
         state: T_State,
         ang: str = ArgStr("E_angle")):
-    qq = event.user_id
-    group = event.group_id
     # sat = state["sat"]
     if ang in ["取消", "算了"]:
         await sub.finish("已取消操作...")
-    try:
-        qth = (await yaml_load(QTH))
-    except FileNotFoundError:
-        qth = {}
-        await sub.finish("没有找到QTH文件，请发送【绑定位置】来绑定QTH\n绑定后可以发送【订阅卫星】来订阅卫星")
     try:
         ang = ang.replace("°", "").replace("度", "")
         if not 0 < int(ang) <= 90:
             await sub.reject_arg("E_angle", "仰角输入有误，应该在0-90之间，请重新输入：")
         else:
             state["ang"] = ang
+    except ValueError:
+        await sub.reject_arg("E_angle", "仰角输入有误，应该是0-90之间的数字，请重新输入：")
+
+
+@sub.got("no_disturb", prompt="是否对上述卫星开启夜间免打扰模式？\n发送【是/否】\n发送【取消】来取消操作")
+async def _(event: GroupMessageEvent,
+            state: T_State,
+            no_disturb: str = ArgStr("no_disturb")):
+    nd_time_range = [20, 8]
+    qq = event.user_id
+    group = event.group_id
+    if no_disturb in ["取消", "算了"]:
+        await sub.finish("已取消操作...")
+    elif no_disturb in ["是", "开启", "开", "y", "Y", "yes", "Yes", "YES"]:
+        state["no_disturb"] = True
+    elif no_disturb in ["否", "不开启", "不开", "不", "n", "N", "no", "No", "NO"]:
+        state["no_disturb"] = False
+    else:
+        await sub.reject_arg("no_disturb", "输入有误，请重新输入：\n发送【是/否】\n发送【取消】来取消操作")
+    try:
+        qth = (await yaml_load(QTH))
+    except FileNotFoundError:
+        qth = {}
+        await sub.finish("没有找到QTH文件，请发送【绑定位置】来绑定QTH\n绑定后可以发送【订阅卫星】来订阅卫星")
+    try:
         if not Path.exists(CONFIG):
             data = {group: {qq: {}}}
             for sat in state["sat"]:
-                temp = {"仰角": state['ang'], "qth": qth[qq], "last_send": ""}
+                temp = {
+                    "仰角": state['ang'],
+                    "qth": qth[qq],
+                    "last_send": "",
+                    "no_disturb": state["no_disturb"],
+                }
+
                 data[group][qq][sat] = temp
+                data[group][qq]["nd_time_range"] = nd_time_range
             await yaml_dump(CONFIG, data)
         else:
             data = (await yaml_load(CONFIG))
@@ -144,18 +167,24 @@ async def _(
                 if qq in qth:
                     if group in data:
                         if qq in data[group]:
-                            data[group][qq][sat] = {"仰角": state['ang'], "qth": qth[qq], "last_send": ""}
+                            data[group][qq][sat] = {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
+                                                    "no_disturb": state["no_disturb"]}
                         else:
-                            data[group][qq] = {sat: {"仰角": state['ang'], "qth": qth[qq], "last_send": ""}}
+                            data[group][qq] = {sat: {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
+                                                     "no_disturb": state["no_disturb"]}}
                     else:
-                        data[group] = {qq: {sat: {"仰角": state['ang'], "qth": qth[qq], "last_send": ""}}}
+                        data[group] = {qq: {sat: {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
+                                                  "no_disturb": state["no_disturb"]}}}
                     await yaml_dump(CONFIG, data)
         await sub.finish("订阅成功:"
                          f"\n卫星：{state['sat']}"
                          f"\n最低仰角：{state['ang']}"
-                         f"\nQTH：{qth[qq]}")
-    except ValueError:
-        await sub.reject_arg("E_angle", "仰角输入有误，应该是0-90之间的数字，请重新输入：")
+                         f"\nQTH：{qth[qq]}"
+                         f"\n夜间免打扰：{'是' if state['no_disturb'] else '否'}"
+                         f"\n免打扰时间：{nd_time_range}")
+    except Exception as e:
+        logger.error(f"订阅失败：{e}")
+        # do sth.
 
 
 unsub = on_command("取消订阅", block=True)
@@ -288,14 +317,26 @@ async def aps():
         return
     today = datetime.now().strftime("%Y-%m-%d")
     try:
-
         data = (await yaml_load(CONFIG))
     except FileNotFoundError:
-        data = await data2Tle()
-
+        # data = await data2Tle()
+        # FIXME ?
+        data = {100001: {4444444: {}}}
     for group in data:
         for qq in data[group]:
+            if not USER_GLOBAL_NO_DISTURB.exists():
+                temp = {qq: {"enable": False, "range": [20, 8]}}
+                await yaml_dump(USER_GLOBAL_NO_DISTURB, temp)
+            user_glb_no_disturb = (await yaml_load(USER_GLOBAL_NO_DISTURB))
+            if qq in user_glb_no_disturb:
+                usr_glb_no_disturb = user_glb_no_disturb[qq].get("enable", False)
+                if usr_glb_no_disturb:
+                    if if_no_disturb(user_glb_no_disturb[qq]["range"]):
+                        logger.debug(f"{qq}: 全局免打扰模式开启，现在是免打扰时间，不发送数据")
+                        continue
             for sat in data[group][qq]:
+                if sat == "nd_time_range":
+                    continue
                 try:
                     last = parse(data[group][qq][sat]["last_send"])
                 except ParserError:
@@ -310,7 +351,7 @@ async def aps():
                     result = await calculate(sat, qth, now)
                     sated = []
                     if float(result[1]) > 0:
-                        logger.info(f"@{qq} 订阅的 {sat} 将入境，正准备计算最高仰角")
+                        logger.debug(f"@{qq} 订阅的 {sat} 将入境，正准备计算最高仰角")
                         i = 0
                         az_list = []
                         alt_list = []
@@ -330,9 +371,14 @@ async def aps():
                             time_highest_point[now] = float(result_[1])
                         a1 = sorted(time_highest_point.items(), key=lambda x: x[1], reverse=True)
                         if float(a1[0][1]) >= float(data[group][qq][sat]["仰角"]):
-                            logger.info("最高仰角大于用户设定的值，正准备提醒用户")
+                            no_disturb = data[group][qq][sat].get("no_disturb", True)
+                            if no_disturb:
+                                user_nd_time_range = data[group][qq][sat].get("nd_time_range", [20, 8])
+                                if if_no_disturb(user_nd_time_range):
+                                    continue
+                            logger.debug("最高仰角大于用户设定的值，正准备提醒用户")
                             if sat not in sated:
-                                logger.info("成功预测到卫星。正在尝试发送数据")
+                                logger.debug("成功预测到卫星。正在尝试发送数据")
                                 azimuth = float(result_[0])
                                 direction = az2direction(azimuth)
                                 azimuth_ = float(result[0])
@@ -352,9 +398,9 @@ async def aps():
                             data[group][qq][sat]["last_send"] = now_to_calculate
                             await yaml_dump(CONFIG, data)
                         else:
-                            logger.info("最高仰角小于用户设定的值，不需要提醒")
+                            logger.debug("最高仰角小于用户设定的值，不需要提醒")
                 else:
-                    logger.info("半小时内该卫星已过境，跳过此卫星")
+                    logger.debug("半小时内该卫星已过境，跳过此卫星")
                     pass
 
 
@@ -365,3 +411,123 @@ scheduler.add_job(aps, 'cron', minute="0/1", id="sat")
 # 定时任务
 
 
+set_nd_time_range = on_command("设置免打扰", block=True, aliases={"免打扰设置"})
+
+
+@set_nd_time_range.handle()
+async def _(bot: Bot, event: GroupMessageEvent, state: T_State, args: Message = CommandArg()):
+    qq = event.user_id
+    group = event.group_id
+    if CONFIG.exists():
+        data = (await yaml_load(CONFIG))
+        if group in data:
+            if qq in data[group]:
+                if args:
+                    nd_time_range = str(args).split(" ")
+                    try:
+                        nd_time_range = [int(nd_time_range[0]), int(nd_time_range[1])]
+                        if nd_time_range[0] < 0 or nd_time_range[1] > 24:
+                            await set_nd_time_range.finish("输入有误，请输入0-24之间的数字")
+                        else:
+                            data[group][qq]["nd_time_range"] = nd_time_range
+                            await yaml_dump(CONFIG, data)
+                            reply = f"{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
+                                1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                            await set_nd_time_range.finish(
+                                f"设置成功，免打扰时间为：{reply}")
+                    except ValueError:
+                        await set_nd_time_range.finish("输入有误，请输入0-24之间的数字")
+                else:
+                    data[group][qq]["no_disturb"] = not data[group][qq].get("no_disturb", True)
+                    await yaml_dump(CONFIG, data)
+                    await set_nd_time_range.finish(f"免打扰：{'开启' if data[group][qq]['no_disturb'] else '关闭'}\n\n"
+                                                   f"若需要设置时间请发送【设置免打扰】+开始时间 结束时间\n例如：\n设置免打扰 20 8")
+            else:
+                data[group][qq]["no_disturb"] = not data[group][qq].get("no_disturb", True)
+                await yaml_dump(CONFIG, data)
+                await set_nd_time_range.finish(f"免打扰：{'开启' if data[group][qq]['no_disturb'] else '关闭'}\n\n"
+                                               f"若需要设置时间请发送【设置免打扰】+开始时间 结束时间\n例如：\n设置免打扰 20 8")
+                await set_nd_time_range.finish("Tips：你在本群没有订阅卫星")
+        else:
+            await set_nd_time_range.finish("本群没有用户订阅卫星\n订阅请发送【订阅卫星】")
+
+
+def if_no_disturb(range_: list[int]) -> bool:
+    """
+    判断是否在免打扰时段
+    :param range_: List[int] eg. [20, 8]
+    :return: bool
+    """
+    now = datetime.now().hour
+    if range_[0] > range_[1]:
+        if now >= range_[0] or now <= range_[1]:
+            logger.debug(f"{now}: 夜间免打扰模式开启，现在是免打扰时间，不发送数据")
+            return True
+    if range_[0] < range_[1]:
+        if range_[0] <= now <= range_[1]:
+            logger.debug(f"{now}: 夜间免打扰模式开启，现在是免打扰时间，不发送数据")
+            return True
+    if range_[0] == range_[1] == now:
+        logger.debug(f"{now}: 夜间免打扰模式开启，现在是免打扰时间，不发送数据")
+        return True
+    return False
+
+
+user_global_no_disturb = on_command("全局免打扰", block=True, aliases={"全局免打扰模式", "设置全局免打扰"})
+
+
+@user_global_no_disturb.handle()
+async def _(bot: Bot, matcher: Matcher, event: MessageEvent, state: T_State, args: Message = CommandArg()):
+    qq = event.user_id
+    if not USER_GLOBAL_NO_DISTURB.exists():
+        temp = {qq: {"enable": False, "range": [20, 8]}}
+        await yaml_dump(USER_GLOBAL_NO_DISTURB, temp)
+    if not args:
+        data = (await yaml_load(USER_GLOBAL_NO_DISTURB))
+
+        if qq in data:
+            data[qq]["enable"] = not data[qq]["enable"]
+            await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
+            await matcher.finish(f"卫星订阅全局免打扰：{'开启' if data[qq]['enable'] else '关闭'}")
+        else:
+            data[qq] = {"enable": True, "range": [20, 8]}
+            await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
+            await matcher.finish(
+                f"首次设置：\n卫星订阅全局免打扰：{'开启' if data[qq]['enable'] else '关闭'}\n默认免打扰时间：20:00-8:00")
+
+    else:
+        if USER_GLOBAL_NO_DISTURB.exists():
+            data = (await yaml_load(USER_GLOBAL_NO_DISTURB))
+            if "enable" not in data[qq]:
+                data[qq]["enable"] = not data[qq].get("enable", True)
+                await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
+                await matcher.send(f"卫星订阅全局免打扰：{'开启' if data[qq]['enable'] else '关闭'}")
+            await nd_args_range(matcher, event, args)
+
+
+async def nd_args_range(matcher: Matcher, event: MessageEvent, args):
+    qq = event.user_id
+    data = (await yaml_load(USER_GLOBAL_NO_DISTURB))
+    if qq in data:
+        if args:
+            nd_time_range = str(args).split(" ")
+            try:
+                nd_time_range = [int(nd_time_range[0]), int(nd_time_range[1])]
+                if nd_time_range[0] < 0 or nd_time_range[1] > 24:
+                    await matcher.finish("输入有误，请输入0-24之间的数字")
+                else:
+                    data[qq]["range"] = nd_time_range
+                    await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
+                    reply = f"{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
+                        1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                    await matcher.finish(
+                        f"设置成功，全局免打扰时间为：{reply}")
+            except ValueError:
+                await matcher.finish("输入有误，请输入0-24之间的数字")
+        else:
+            await matcher.finish("请发送【全局免打扰】+开始时间 结束时间\n例如：\n全局免打扰 20 8")
+    else:
+        data[qq]["range"] = {"enable": True, "range": [20, 8]}
+        await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
+        await matcher.finish(
+            f"首次设置：\n卫星订阅全局免打扰：{'开启' if data[qq]['enable'] else '关闭'}\n默认免打扰时间：20:00-8:00")

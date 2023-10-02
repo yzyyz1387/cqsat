@@ -69,7 +69,7 @@ async def get_tian_gong():
         CACHE_CSS.unlink() if CACHE_CSS.exists() else ...
         TIANGONG.unlink() if TIANGONG.exists() else ...
         tg_data = await download_css_data()
-    logger.info("css数据读取完成")
+    logger.debug("css数据读取完成")
     return tg_data
 
 
@@ -97,7 +97,7 @@ async def download_ham_sat():
     await get_tian_gong()
     url = "https://amsat.org/tle/current/nasabare.txt"
     if timeCompare(CACHE_OTHER, DATA_DICT):
-        logger.info("读取在线数据...")
+        logger.debug("读取卫星在线数据...")
         ham_sat_ = (await http_get(url))
         if not ham_sat_:
             logger.error(f"从 {url} 下载数据出错")
@@ -108,7 +108,7 @@ async def download_ham_sat():
             CACHE_OTHER.touch()
             return ham_sat_
     else:
-        logger.info("读取本地数据...")
+        logger.debug("读取卫星本地数据...")
         ham_sat_ = await read_all(HAM_SAT)
         return ham_sat_
 
@@ -120,7 +120,7 @@ async def data2Tle() -> Dict[str, list]:
     """
     (await download_ham_sat())
     content = await read_all(HAM_SAT)
-    logger.info("载入卫星TLE数据...")
+    logger.debug("载入卫星TLE数据...")
     count = 0
     data = {}
     temp = []
@@ -146,7 +146,7 @@ async def calculate(name: str, location: list, time=ephem.now()) -> Optional[lis
     :return: [方位角，仰角，相对速率]
     """
     logger.debug(f"触发计算：{str(time)}")
-    logger.info(f"计算卫星:{name}")
+    logger.debug(f"计算卫星:{name}")
     logger.debug("QTJ:{str(location)}")
 
     me = ephem.Observer()
