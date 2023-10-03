@@ -166,6 +166,7 @@ async def _(event: GroupMessageEvent,
             for sat in state["sat"]:
                 if qq in qth:
                     if group in data:
+                        data[group][qq]["nd_time_range"] = nd_time_range
                         if qq in data[group]:
                             data[group][qq][sat] = {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
                                                     "no_disturb": state["no_disturb"]}
@@ -181,7 +182,9 @@ async def _(event: GroupMessageEvent,
                          f"\n最低仰角：{state['ang']}"
                          f"\nQTH：{qth[qq]}"
                          f"\n夜间免打扰：{'是' if state['no_disturb'] else '否'}"
-                         f"\n免打扰时间：{nd_time_range}")
+                         
+                         f"\n免打扰时间：{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
+                    1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00")
     except Exception as e:
         logger.error(f"订阅失败：{e}")
         # do sth.
@@ -229,10 +232,20 @@ async def refer_sat_(bot: Bot, event: GroupMessageEvent, state: T_State, args: M
     if group in data:
         if qq in data[group]:
             await refer_sat_subs.send(MessageSegment.at(qq) + ",你在本群订阅了以下卫星：\n")
-            reply = ""
-            for sat in data[group][qq]:
-                reply += sat + "\n"
-            await refer_sat_subs.send(reply)
+            messages = []
+            for k, v in data[group][qq].items():
+                if k == "nd_time_range":
+                    continue
+                reply = ""
+                reply += k
+                reply += f"\n最低仰角：{v['仰角']}"
+                reply += f"\n免打扰：{'开' if v.get('no_disturb', False) else '关'}"
+                nd_time_range = data[group][qq]["nd_time_range"]
+                f""
+                reply += f"\n免打扰时间：{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
+                    1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                messages.append(reply)
+            await send_forward_msg(bot, event, "订阅卫星列表", messages)
         else:
             await refer_sat_subs.send(f"{qq}在本群没有订阅卫星")
     else:
@@ -506,6 +519,13 @@ async def _(bot: Bot, matcher: Matcher, event: MessageEvent, state: T_State, arg
 
 
 async def nd_args_range(matcher: Matcher, event: MessageEvent, args):
+    """
+    处理全局免打扰的时间参数并写入文件
+    :param matcher: Matcher
+    :param event: MessageEvent
+    :param args: 输入参数
+    :return:
+    """
     qq = event.user_id
     data = (await yaml_load(USER_GLOBAL_NO_DISTURB))
     if qq in data:
