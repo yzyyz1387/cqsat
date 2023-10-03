@@ -192,7 +192,7 @@ async def sat_match_scr(sat, obs1, obs2):
     this_png = SHOOTS_OUT_PATH / f"satmatch{datetime.now()}.png"
     await shoot_scr(url,
                     img_output=this_png,
-                    proxy=plugin_config.sat_proxy_url,
+                    timeout=0,
                     locator="html",
                     until="networkidle")
     return this_png

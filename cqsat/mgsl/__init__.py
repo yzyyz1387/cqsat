@@ -58,4 +58,4 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
                 f"你没有发送经纬度，为你计算你的网格\n{'-' * 10}\n你的网格：{await getGrid(float(qth[0]), float(qth[1]))}\n{'-' * 10}"
                 f"\n计算指定位置请发送：\n【计算网格 北京】\n【查询网格 经度 纬度】\n (经纬度用空格隔开)")
         else:
-            await grid_refer.finish("错误：请输入参数\n命令示例：\n【计算网格 北京】\n【计算网格 75.8656 (空格) 39.3809】")
+            await grid_refer.finish("错误：请输入参数\n命令示例：\n【计算网格 北京】（区县）\n【计算网格 75.8656 (空格) 39.3809】")
