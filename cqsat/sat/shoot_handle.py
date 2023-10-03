@@ -161,12 +161,30 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             if qth is None:
                 await sat_match.finish(
                     "你可能只输入了一个网格，此时我会根据你的网格和你输入的网格进行匹配\n但看起来你还没有设置QTH,可以发送【绑定位置】来绑定QH")
+            if isChinese(args[1]):
+                location = await getLlByAd(args[1])
+                if location:
+                    qth_input = [location[0], location[1], 0]
+                    gird = await getGrid(float(qth_input[0]), float(qth_input[1]))
+                    args[1] = gird
+                else:
+                    await sat_match.finish(f"未查询到{args[1]}的经纬度, 请检查一下吧~")
             sat = args[0].upper()
             obs1 = await getGrid(float(qth[0]), float(qth[1]))
             obs2 = args[1].upper()
             this_png = await sat_match_scr(sat, obs1, obs2)
 
         elif len(args) >= 3:
+
+            for arg in args[1:]:
+                if isChinese(arg):
+                    location = await getLlByAd(arg)
+                    if location:
+                        qth = [location[0], location[1], 0]
+                        gird = await getGrid(float(qth[0]), float(qth[1]))
+                        args[args.index(arg)] = gird
+                    else:
+                        await sat_match.finish(f"未查询到{arg}的经纬度, 请检查一下吧~")
             sat = args[0].upper()
             obs1 = args[1].upper()
             obs2 = args[2].upper()
@@ -185,9 +203,11 @@ async def sat_match_scr(sat, obs1, obs2):
     url = f"https://www.satmatch.com/satellite/{sat}/obs1/{obs1}/obs2/{obs2}"
     async with httpx.AsyncClient() as client:
         r = (await client.get(url))
-        if r.status_code == 400:
+        if r.status_code != 200:
             await sat_match.finish(
-                "有什么出错了~\n请检查卫星名/网格的输入吧~\n/约 卫星,卫星 网格1 网格2\n若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 iss,so-50 OM44 OM48")
+                f"有什么出错了~\nerr{r.status_code}\n请检查卫星名/网格的输入吧~\n/约 卫星,卫星 网格1 网格2\n"
+                f"若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 "
+                f"iss,so-50 OM44 OM48")
     logger.info(url)
     this_png = SHOOTS_OUT_PATH / f"satmatch{datetime.now()}.png"
     await shoot_scr(url,
