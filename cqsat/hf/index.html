@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" />
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <style>
+        .thead_ th{
+            font-size: 22px;
+        }
+        .data td{
+            font-size: 20px;
+            text-shadow: 0 0 10px #ffffff,0 0 20px #ffffff,0 0 30px #ffffff,0 0 40px #ffffff;
+
+        }
+    </style>
+</head>
+<body style="width: 800px">
+<div  class="mdui-container-fluid">
+<div class="mdui-table-fluid"  >
+    <table class="mdui-table">
+        <thead>
+        <tr>
+           <th colspan="3" style="text-align: center"> <h2>传播预测</h2> </th>
+        </tr>
+        </thead>
+        <thead>
+        <tr style="font-weight: bold" class="thead_">
+            <th>波段</th>
+            <th>白天</th>
+            <th>夜晚</th>
+        </tr>
+        </thead>
+
+        {% for i in data %}
+        <tr style="text-align: center" class="data">
+            <td> {{ i }}</td>
+            {% if data[i]["day"]=="好"  %}
+                <td style="color:#00c12b87"> {{ data[i]["day"] }}</td>
+            {% elif data[i]["day"]=="良" %}
+                <td style="color:#FFA50087"> {{ data[i]["day"] }}</td>
+            {% elif data[i]["day"]=="差" %}
+                <td style="color:#FF000087"> {{ data[i]["day"] }}</td>
+            {% endif %}
+
+            {% if data[i]["night"]=="好"  %}
+                <td style="color:#00c12b87"> {{ data[i]["night"] }}</td>
+            {% elif data[i]["night"]=="良" %}
+                <td style="color:#FFA50087"> {{ data[i]["night"] }}</td>
+            {% elif data[i]["night"]=="差" %}
+                <td style="color:#FF000087"> {{ data[i]["night"] }}</td>
+            {% endif %}
+
+        </tr>
+        {% endfor %}
+        <tr><td></td>></tr>
+      </table>
+</div>
+</div>
+</body>
+</html>

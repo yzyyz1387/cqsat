@@ -11,6 +11,7 @@ from . import (
     mgsl,
     sat,
     config,
+    hf,
     log,
     path,
     utils,
