@@ -44,6 +44,12 @@ async def getSubSquare(long: float, latitude: float):
 
 
 async def getGrid(long: float, latitude: float):
+    """
+    计算网格
+    :param long: 经度
+    :param latitude: 纬度
+    :return:
+    """
     gridPos = await getField(long, latitude)
     gridPos += await getSquare(long, latitude)
     gridPos += await getSubSquare(long, latitude)

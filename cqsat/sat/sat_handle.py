@@ -19,6 +19,7 @@ from nonebot.internal.params import ArgStr
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 
+from ..mgsl import getGrid
 from .calculate_sat import download_ham_sat, data2Tle, calculate, get_tian_gong
 from ..log import log
 from ..path import *
@@ -176,15 +177,15 @@ async def _(event: GroupMessageEvent,
                     else:
                         data[group] = {qq: {sat: {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
                                                   "no_disturb": state["no_disturb"]}}}
+                    data[group][qq]["nd_time_range"] = nd_time_range
                     await yaml_dump(CONFIG, data)
-        await sub.finish("订阅成功:"
-                         f"\n卫星：{state['sat']}"
-                         f"\n最低仰角：{state['ang']}"
-                         f"\nQTH：{qth[qq]}"
-                         f"\n夜间免打扰：{'是' if state['no_disturb'] else '否'}"
-                         
-                         f"\n免打扰时间：{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
-                    1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00")
+        gird = await getGrid(float(qth[qq][0]), float(qth[qq][1]))
+        await sub.send(f"订阅成功:\n"
+                       f"卫星：{state['sat']}\n"
+                       f"最低仰角：{state['ang']}\n"
+                       f"QTH：{qth[qq]}({gird})\n"
+                       f"夜间免打扰：{'是' if state['no_disturb'] else '否'}"
+                       f"\n免打扰时间：{nd_time_send(nd_time_range)}")
     except Exception as e:
         logger.error(f"订阅失败：{e}")
         # do sth.
@@ -241,9 +242,7 @@ async def refer_sat_(bot: Bot, event: GroupMessageEvent, state: T_State, args: M
                 reply += f"\n最低仰角：{v['仰角']}"
                 reply += f"\n免打扰：{'开' if v.get('no_disturb', False) else '关'}"
                 nd_time_range = data[group][qq]["nd_time_range"]
-                f""
-                reply += f"\n免打扰时间：{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
-                    1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                reply = f"{nd_time_send(nd_time_range)}"
                 messages.append(reply)
             await send_forward_msg(bot, event, "订阅卫星列表", messages)
         else:
@@ -444,8 +443,7 @@ async def _(bot: Bot, event: GroupMessageEvent, state: T_State, args: Message = 
                         else:
                             data[group][qq]["nd_time_range"] = nd_time_range
                             await yaml_dump(CONFIG, data)
-                            reply = f"{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
-                                1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                            reply = f"{nd_time_send(nd_time_range)}"
                             await set_nd_time_range.finish(
                                 f"设置成功，免打扰时间为：{reply}")
                     except ValueError:
@@ -538,8 +536,7 @@ async def nd_args_range(matcher: Matcher, event: MessageEvent, args):
                 else:
                     data[qq]["range"] = nd_time_range
                     await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
-                    reply = f"{nd_time_range[0]}:00" if nd_time_range[0] == nd_time_range[
-                        1] else f"{nd_time_range[0]}:00-{nd_time_range[1]}:00"
+                    reply = f"{nd_time_send(nd_time_range)}"
                     await matcher.finish(
                         f"设置成功，全局免打扰时间为：{reply}")
             except ValueError:
@@ -551,3 +548,11 @@ async def nd_args_range(matcher: Matcher, event: MessageEvent, args):
         await yaml_dump(USER_GLOBAL_NO_DISTURB, data)
         await matcher.finish(
             f"首次设置：\n卫星订阅全局免打扰：{'开启' if data[qq]['enable'] else '关闭'}\n默认免打扰时间：20:00-8:00")
+
+
+def nd_time_send(nd_time_range):
+    if nd_time_range[0] == nd_time_range[1]:
+        send = str(nd_time_range[0]) + ":00"
+    else:
+        send = str(nd_time_range[0]) + ":00-" + str(nd_time_range[1]) + ":00"
+    return send
