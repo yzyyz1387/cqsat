@@ -242,7 +242,7 @@ async def refer_sat_(bot: Bot, event: GroupMessageEvent, state: T_State, args: M
                 reply += f"\n最低仰角：{v['仰角']}"
                 reply += f"\n免打扰：{'开' if v.get('no_disturb', False) else '关'}"
                 nd_time_range = data[group][qq]["nd_time_range"]
-                reply = f"{nd_time_send(nd_time_range)}"
+                reply += f"\n免打扰时段：{nd_time_send(nd_time_range)}"
                 messages.append(reply)
             await send_forward_msg(bot, event, "订阅卫星列表", messages)
         else:

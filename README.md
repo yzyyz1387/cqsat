@@ -219,7 +219,7 @@ nb plugin install nonebot-plugin-cqsat
 
 ### /截图
 - 机器人superuser可使用/截图指令
-  - `/截图 add url=xxx path=xxx cmd=xxx proxy=xxx **kwargs`
+  - `/截图 add url=xxx path=xxx cmd=xx,xxx proxy=xxx **kwargs`
     - url: 截图网址
     - path: 截图保存路径
     - cmd: 截图命令

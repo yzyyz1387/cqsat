@@ -110,6 +110,7 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
                 if not keyword_.get("url", None) or not keyword_.get("cmd", None) or not keyword_.get("path", None):
                     await bank_handle.finish("参数错误：\n/截图add url=xxx cmd=xxx path=xxx locator=xxx time_out=123 "
                                              "...\n必须包含url、cmd、path")
+                keyword_["cmd"]=keyword_["cmd"].split(",")
                 url_bank.add(**keyword_)
                 await bank_handle.finish("添加成功")
             else:
