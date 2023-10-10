@@ -167,7 +167,6 @@ async def _(event: GroupMessageEvent,
             for sat in state["sat"]:
                 if qq in qth:
                     if group in data:
-                        data[group][qq]["nd_time_range"] = nd_time_range
                         if qq in data[group]:
                             data[group][qq][sat] = {"仰角": state['ang'], "qth": qth[qq], "last_send": "",
                                                     "no_disturb": state["no_disturb"]}
