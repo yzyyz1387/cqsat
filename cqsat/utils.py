@@ -5,6 +5,7 @@
 # @Email   :  youzyyz1384@qq.com
 # @File    : utils.py
 # @Software: PyCharm
+import base64
 import json
 import random
 from typing import Union, Optional, TextIO, Iterable, Literal
@@ -349,3 +350,10 @@ async def send_forward_msg(bot: Bot, event: MessageEvent, nickname: str, message
                 }
                 for r in messages
             ])
+
+
+def pic_2_base64(pic):
+    with open(pic, 'rb') as f:
+        base64_data = base64.b64encode(f.read())
+        s = base64_data.decode()
+        return 'base64://' + s

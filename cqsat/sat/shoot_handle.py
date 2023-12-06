@@ -77,7 +77,8 @@ async def query_tevel_(bot: Bot, event: MessageEvent, state: T_State, args: Mess
                                         timeout=timeout,
                                         until=until)
                     try:
-                        await shoot_web.send(MessageSegment.image(f"file:///{Path(path).resolve()}"))
+                        b64 = pic_2_base64(path)
+                        await shoot_web.send(MessageSegment.image(f"{b64}"))
                     except Exception as e:
                         await shoot_web.finish(f"图片发送失败，哪里出错了？\n{e}")
 
@@ -110,7 +111,8 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
                 if not keyword_.get("url", None) or not keyword_.get("cmd", None) or not keyword_.get("path", None):
                     await bank_handle.finish("参数错误：\n/截图add url=xxx cmd=xxx path=xxx locator=xxx time_out=123 "
                                              "...\n必须包含url、cmd、path")
-                keyword_["cmd"]=keyword_["cmd"].split(",")
+                keyword_["cmd"] = keyword_["cmd"].split(",")
+                keyword_['timeout'] = int(keyword_['timeout']) if keyword_.get("timeout") else 0
                 url_bank.add(**keyword_)
                 await bank_handle.finish("添加成功")
             else:
@@ -191,10 +193,12 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = Comma
             obs2 = args[2].upper()
             this_png = await sat_match_scr(sat, obs1, obs2)
         else:
-            await sat_match.finish("参数错误：\n/约 卫星,卫星 网格1 网格2\n若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 iss,so-50 OM44 OM48")
+            await sat_match.finish(
+                "参数错误：\n/约 卫星,卫星 网格1 网格2\n若只输入了一个网格，会根据绑定的位置和输入的网格进行匹配\n例如：/约 iss,so-50 OM44 OM48")
         try:
+            b64 = pic_2_base64(this_png)
             await sat_match.send(f"{obs1} 和 {obs2} 通过 {sat}的通联可能性预测\n" + MessageSegment.image(
-                f"file:///{Path(this_png).resolve()}"))
+                f"{b64}"))
             this_png.unlink()
         except ActionFailed:
             await sat_match.finish("图片发送失败，哪里出错了？")

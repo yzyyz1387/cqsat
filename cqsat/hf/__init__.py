@@ -65,4 +65,4 @@ async def get_hf_xml_(bot: Bot, event: MessageEvent, state: T_State, args: Messa
             locator='table',
             img_output=out,
         )
-        await get_hf_xml.finish(MessageSegment.image(f"file:///{Path(out).resolve()}"))
+        await get_hf_xml.finish(MessageSegment.image(f"{pic_2_base64(out)}"))

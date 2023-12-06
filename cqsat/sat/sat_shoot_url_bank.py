@@ -65,7 +65,7 @@ class UrlBank:
 
     def add(self, **kwargs):
         self.url_bank.append(kwargs)
-        json_upload(SHOOTS_URL_BANK, url_bank)
+        json_upload(SHOOTS_URL_BANK, self.url_bank)
 
     def remove(self, **kwargs):
         url = kwargs.get("url", " ")
