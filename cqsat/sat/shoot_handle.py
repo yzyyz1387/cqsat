@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timedelta
 
 import httpx
-from nonebot import on_command, require
+from nonebot import on_command
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, MessageSegment, MessageEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
