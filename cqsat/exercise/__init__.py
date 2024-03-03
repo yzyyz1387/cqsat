@@ -119,7 +119,9 @@ async def send_ex(ex_bank, last, qq, level, state):
         f"D. {dic_to_send['D']}\n"
     )
     if state["pic_to_send"]:
-        await do_exercise.send(MessageSegment.image(f"file:///{(IMG / state['pic_to_send']).absolute()}"))
+        with open(IMG / state["pic_to_send"], "rb") as f:
+            pic = f.read()
+        await do_exercise.send(MessageSegment.image(pic))
         await do_exercise.reject(reply)
     else:
         await do_exercise.reject(reply)

@@ -8,6 +8,7 @@
 import datetime
 import json
 import random
+import time
 
 from nonebot import on_command, require, Bot
 from nonebot.adapters.onebot.v11 import MessageSegment, MessageEvent, Message, GroupMessageEvent, PrivateMessageEvent, \
@@ -61,7 +62,8 @@ async def _(
                 wrong_to_send += f"{i}: {wrong[i]}次\n"
         else:
             wrong_to_send = "无"
-        await do_exam.send(state["user_notice"] + f"你在此前已经完成过{already_done}次考试，最高分为{best}分，错题情况如下：\n{wrong_to_send}")
+        await do_exam.send(state[
+                               "user_notice"] + f"你在此前已经完成过{already_done}次考试，最高分为{best}分，错题情况如下：\n{wrong_to_send}")
 
     state['last'] = 0
     state["correct"] = 0
@@ -90,14 +92,15 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
         time_up = datetime.datetime.now() + datetime.timedelta(minutes=this_config[1])
         await do_exam.send(f"考试于{time_up.strftime('%H:%M:%S')}结束")
         state["time_is_up"] = time_up
+        id_schedule = f"{qq}_exam{time.time()}"
         scheduler.add_job(
             finish_matcher_cause_time,
             "date",
             run_date=time_up,
             args=[matcher],
-            id=f"{qq}_exam"
+            id=id_schedule
         )
-
+        state["id_schedule"] = id_schedule
     ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
     if not state["ex_list"]:
         ex_list = random.sample(range(1, len(ex_bank)), this_config[0])
@@ -108,7 +111,7 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
         last = ex_list[0]
         state['last'] = last
     if reply in ["取消", "算了", "退出", "不做了", "怎么退出"]:
-        scheduler.remove_job(f"{qq}_exam")
+        scheduler.remove_job(state["id_schedule"])
         await do_exam.finish("已取消操作...")
     if reply in ["时间", "还有多久结束", "还剩多久结束", "查看时间"]:
         time_is_up = state["time_is_up"]
@@ -122,7 +125,7 @@ async def _(matcher: Matcher, state: T_State, reply: str = ArgPlainText("answer"
                 for i in range(this_config[0]):
                     # if state["this_send"][reply.upper()] != state["this_answer"]:
                     if reply.upper() != state["this_answer"]:
-                        await do_exam.send(f"× 应为 {state['this_answer']}"+ "\n"+ state["user_notice"])
+                        await do_exam.send(f"× 应为 {state['this_answer']}" + "\n" + state["user_notice"])
                         last_ = last
                         last = ex_list[ex_list.index(last) + 1]
                         state["last"] = last
@@ -237,7 +240,7 @@ async def finish_matcher_cause_time(matcher: Matcher):
         f"{'祝贺你考试通过！' if state['correct'] >= state['this_config'][2] else '很遗憾本次考试未通过...再接再厉！'}\n"
         f"{'-' * 10}\n"
     )
-#      删除cache
+    #      删除cache
     if cache_path.exists():
         cache_path.unlink()
     else:
@@ -273,13 +276,13 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
         f"B类：{r_b if r_b else 0}\n"
         f"{'-' * 10}\n"
         f"C类：{r_c if r_c else 0}\n"
-                        )
+    )
 
 
 refer_question = on_command("查题", aliases={"查询题目"}, priority=5, block=True)
 
 @refer_question.handle()
-async def _(bot: Bot, event: MessageEvent, state: T_State, args:Message=CommandArg()):
+async def _(bot: Bot, event: MessageEvent, state: T_State, args: Message = CommandArg()):
     if not args:
         await refer_question.finish("请发送【查题 级别 题号】\n例如：\n  查题 A 1\n级别和题号之间用空格分割")
     else:
@@ -287,20 +290,28 @@ async def _(bot: Bot, event: MessageEvent, state: T_State, args:Message=CommandA
         if len(a_list) != 2:
             await refer_question.finish("请发送【查题 级别 题号】\n例如：\n  查题 A 1\n级别和题号之间用空格分割")
         else:
+            num = 0
             for i in a_list:
                 if i.isdigit():
                     num = i
-                    a_list.pop(a_list.index(i))
-                    level = a_list[0].upper()
+            if num:
+                a_list.pop(a_list.index(i))
+                level = a_list[0].upper()
+                if level not in ["A", "B", "C"]:
+                    await refer_question.finish("级别错误，应该为A、B、C其中一个")
                 else:
-                    await refer_question.finish("请发送【查题 级别 题号】\n例如：\n  查题 A 1\n级别和题号之间用空格分割")
-            if level not in ["A", "B", "C"]:
-                await refer_question.finish("级别错误，应该为A、B、C其中一个")
+                    ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
+                    if int(num) > len(ex_bank):
+                        await refer_question.finish("题号错误，题库中没有这么多题目")
+                    else:
+                        if ex_bank[num]["P"]:
+                            with open(IMG / ex_bank[num]["P"], "rb") as f:
+                                img = f.read()
+                            await refer_question.send(MessageSegment.image(img))
+                        await refer_question.send(
+                            f"{level} 类第 {num}题:\n{ex_bank[num]['Q']}\n：A、{ex_bank[num]['A']}\nB、{ex_bank[num]['B']}\nC、{ex_bank[num]['C']}\nD、{ex_bank[num]['D']}\n答案: 【A】")
+
             else:
-                ex_bank = json.loads(await read_all(BANK / f"{level}.json"))
-                if int(num) > len(ex_bank):
-                    await refer_question.finish("题号错误，题库中没有这么多题目")
-                else:
-                    if ex_bank[num]["P"]:
-                        await refer_question.send(MessageSegment.image(f"file:///{(IMG / ex_bank[num]['P']).absolute()}"))
-                    await refer_question.send(f"{level} 类第 {num}题:\n{ex_bank[num]['Q']}\n：A、{ex_bank[num]['A']}\nB、{ex_bank[num]['B']}\nC、{ex_bank[num]['C']}\nD、{ex_bank[num]['D']}\n答案: 【A】")
+                await refer_question.finish("题号似乎有误~")
+
+
