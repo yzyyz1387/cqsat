@@ -91,6 +91,7 @@ async def _(
         else:
             user_sat = sat.split(" ")
             if len(user_sat) == 1:
+                sat = "TEVEL-" + sat[-1] if sat[0] in ["T", "t"] and sat[-1].isdigit() else sat
                 if sat in sat_s or sat.upper() in sat_s:
                     state["sat"] = [sat.upper()]
                 else:
@@ -99,6 +100,7 @@ async def _(
             else:
                 temp = []
                 for sat_ in user_sat:
+                    sat_ = "TEVEL-" + sat_[-1] if sat_[0] in ["T", "t"] and sat_[-1].isdigit() else sat_
                     if sat_ == "天宫" or sat == "中国空间站" or sat in ["TIANGONG", "tiangong"]:
                         temp.append("天宫")
                     elif sat_.upper() in sat_s:
@@ -201,6 +203,7 @@ async def unsub_(bot: Bot, event: GroupMessageEvent, state: T_State, args: Messa
         sat_s = str(args).split(" ")
         data = (await yaml_load(CONFIG))
         for sat in sat_s:
+            sat = "TEVEL-" + sat[-1] if sat[0] in ["T", "t"] and sat[-1].isdigit() else sat
             if isChinese(sat):
                 pass
             else:
