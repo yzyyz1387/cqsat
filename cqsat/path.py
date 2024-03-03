@@ -35,9 +35,10 @@ SHOOTS_OUT_PATH = LOCAL / 'shoots_out'
 SHOOTS_URL_BANK = LOCAL / 'shoots_url_bank.json'
 MDC_GENERATOR_PATH = LOCAL / 'mdc_generator'
 USER_GLOBAL_NO_DISTURB = LOCAL / 'user_no_disturb.yml'
+MENU_PATH = LOCAL / 'menu'
 
 
-path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C, TLE_CACHE_PATH, SHOOTS_OUT_PATH, MDC_GENERATOR_PATH]
+path_list = [LOCAL, EXAM_CACHE, EXAM_CACHE_A, EXAM_CACHE_B, EXAM_CACHE_C, TLE_CACHE_PATH, SHOOTS_OUT_PATH, MDC_GENERATOR_PATH, MENU_PATH]
 driver = get_driver()
 global_config = driver.config
 

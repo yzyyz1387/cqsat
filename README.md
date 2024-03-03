@@ -78,6 +78,9 @@ nonebot.load_plugin("cqsat")
 nb plugin install nonebot-plugin-cqsat
 ```
 
+## 菜单
+发送 【/cq】
+
 ## 说明
 
 ### 追星
@@ -96,6 +99,8 @@ nb plugin install nonebot-plugin-cqsat
   - 检测当前时间10分钟后，用户所定阅卫星的情况
   - 如果十分钟后入境，并且从入境到出境期间出现的最高仰角大于用户设定的最低仰角，将在群内@用户并提示
 - 在执行输入操作时，输入`取消` 或者 `算了` 可取消当前操作
+
+
 
 #### 刷题
 

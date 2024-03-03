@@ -12,3 +12,4 @@ pysilk-mod
 soundfile
 librosa
 pydub
+markdown
