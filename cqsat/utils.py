@@ -260,7 +260,9 @@ async def send_ex(
 
     await write_(state_for_time, json.dumps(state_2))
     if state["pic_to_send"]:
-        await matcher.send(MessageSegment.image(f"file:///{(IMG / state['pic_to_send']).absolute()}"))
+        with open(IMG / state["pic_to_send"], "rb") as f:
+            pic = f.read()
+        await matcher.send(MessageSegment.image(pic))
         await matcher.reject(state["user_notice"] + reply)
     else:
         await matcher.reject(state["user_notice"] + reply)
