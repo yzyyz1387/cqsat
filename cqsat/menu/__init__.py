@@ -21,6 +21,48 @@ from ..utils import shoot_scr
 
 # FIXME
 menu_md = ["""
+
+## 卫星
+### 绑定QTH:  【群内、私聊】
+- 绑定时发送：`绑定位置`
+- 更改位置时同样发送：`绑定位置`
+- 需要输入
+  - 地名
+    - 例如：`北京`
+  - `经度 纬度 海拔`(以空格分隔)
+    - 例如：  75.8656 39.3809 1330.0
+
+### 订阅卫星：  【群内】
+订阅时发送：`订阅卫星`期间会让用户输入：
+
+- `卫星名称`:  大小写不敏感(多卫星用空格分隔)
+  - 例如：SO-50 ISS ao-92
+- `最低仰角`:  输入数字（1, 90] （允许输入`xx度`或`xx°`）
+  - 例如 10
+
+### 查询订阅的卫星 【群内】
+- 发送  `查询订阅`
+
+### 查询支持的卫星列表 【群内、私聊】
+- 发送`卫星列表`
+
+### 查询某卫星在指定分钟后的状态 【群内、私聊】
+
+- 发送  `查询卫星+卫星名+ +分钟数`  卫星名和分钟数用空格分隔
+  - 例如 查询卫星SO-50 50  （查询so-50在50分钟后的状态）
+- 或 `计算卫星+卫星名+ +分钟数` 卫星名和分钟数用空格分隔
+
+
+### 取消订阅卫星  【群内】
+- 发送`取消订阅+卫星名称` 多颗卫星用空格分隔
+  - 例如：取消订阅 SO-50 ISS ao-92
+
+
+### 取消当前操作
+- 在问答过程中发送`取消` 或者 `算了` 可取消当前操作
+""",
+
+           """
 ### 查看相关网页截图
 - 发送`/s` 即可查看相关网站的截图 例如 `/s t a`
   - t https://www.df2et.de/tevel/ 
@@ -97,7 +139,7 @@ async def _(bot: Bot, event: MessageEvent):
     for html in html_list:
         save_html(html, MENU_PATH / "menu.html")
         path = Path(MENU_PATH / 'menu.html').resolve()
-        await shoot_scr("file:///" + str(path).replace("\\", "/"), img_output= MENU_PATH / "menu.png")
+        await shoot_scr("file:///" + str(path).replace("\\", "/"), img_output=MENU_PATH / "menu.png")
         with open(MENU_PATH / "menu.png", "rb") as f:
             img = f.read()
         await bot.send(event, message=MessageSegment.image(img))
