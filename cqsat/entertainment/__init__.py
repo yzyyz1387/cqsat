@@ -58,6 +58,11 @@ async def _(bot: Bot, event: MessageEvent, state: T_State):
             mdc=(random.choice(mdc_list)).absolute(),
             prefix=prefixes_path,
             snr=state.get("noise", 0))
-        await voice_synthesis.finish(MessageSegment.record(f"file:///{output_voice_path}"))
+        with open(output_voice_path, "rb") as f:
+            await voice_synthesis.finish(MessageSegment.record(f.read()))
     else:
         await voice_synthesis.finish("请回复语音，操作已退出...")
+
+
+# FIXME 两端分离后拿不到用户发送的语音文件怎么办？
+
