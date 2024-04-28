@@ -1,7 +1,12 @@
-<p align="center">
-  <a href="img/cqsat.png" width="200" height="200" alt="cqsat"></a>
-</p>
+
 <div align="center">
+
+<p align="center">
+  
+  <img src="img/cqsat.png" width="200" height="200" alt="cqsat"></img>
+  
+</p>
+
 
 **你的star是我的动力**
 **↓**
