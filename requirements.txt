@@ -13,3 +13,4 @@ soundfile
 librosa
 pydub
 markdown
+playwright
